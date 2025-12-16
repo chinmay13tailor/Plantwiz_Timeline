@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Plantwiz | Production Timeline</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>
+/* ================= BASE ================= */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  background: #f4f7fb;
+  color: #1f2937;
+}
+
+.container {
+  max-width: 1400px;
+  margin: auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+}
+
+/* ================= HEADER ================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: #475569;
+  margin-top: 4px;
+}
+
+/* ================= DATE SELECTOR ================= */
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #c7d2fe;
+  background: #f8fafc;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+/* ================= TIMELINE ================= */
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.block {
+  border-radius: 14px;
+  padding: 14px;
+  border: 2px solid #e5e7eb;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.block.good { border-color: #22c55e; background: #f0fdf4; }
+.block.warning { border-color: #f59e0b; background: #fffbeb; }
+.block.critical { border-color: #ef4444; background: #fef2f2; }
+
+.block:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+}
+
+.block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.time {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.status {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
+.good .status { background: #22c55e; color: #fff; }
+.warning .status { background: #f59e0b; color: #fff; }
+.critical .status { background: #ef4444; color: #fff; }
+
+.metric {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.metric strong {
+  font-size: 18px;
+  color: #0f172a;
+}
+
+/* ================= DETAILS ================= */
+.details {
+  margin-top: 24px;
+  display: none;
+  border-radius: 16px;
+  padding: 20px;
+  border: 2px solid #e5e7eb;
+}
+
+.details.active { display: block; }
+
+.details.good { border-color: #22c55e; background: #f0fdf4; }
+.details.warning { border-color: #f59e0b; background: #fffbeb; }
+.details.critical { border-color: #ef4444; background: #fef2f2; }
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 16px;
+}
+
+.card {
+  background: #fff;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.card h4 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.card .val {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.insight {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="brand">Plantwiz</div>
+      <div class="subtitle">Production Timeline</div>
+    </div>
+    <div class="subtitle">Viewing: Today</div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="btn active">Today</div>
+    <div class="btn">Yesterday</div>
+    <div class="btn">Custom Date</div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div id="timeline" class="timeline"></div>
+
+  <!-- DETAILS -->
+  <div id="details" class="details"></div>
+
+</div>
+
+<script>
+/* ================= CONFIG ================= */
+const API_BASE = "https://plantwiz.pimateck.in/api";
+const DEVICE_ID = "PUT_DEVICE_ID_HERE";
+
+const KEYS = [
+  "Meter_Run_Per_Min",
+  "Consumption_Per_Min",
+  "deltaexpectedproduction",
+  "Runtime",
+  "Downtime",
+  "Idletime",
+  "deltaperformance",
+  "deltaavailability",
+  "deltaquality",
+  "deltaoee"
+];
+
+const BLOCKS = ["00–04","04–08","08–12","12–16","16–20","20–24"];
+
+const qs = new URLSearchParams(location.search);
+const JWT = qs.get("token");
+
+/* ================= HELPERS ================= */
+const avg = a => a.length ? a.reduce((s,v)=>s+v,0)/a.length : 0;
+const num = v => Number(v)||0;
+
+function blockIndex(ts){
+  return Math.floor(new Date(ts).getHours()/4);
+}
+
+/* ================= FETCH ================= */
+async function fetchData(){
+  const d = new Date();
+  const start = new Date(d.toDateString()).getTime();
+  const end = start + 86400000 - 1;
+
+  const url = `${API_BASE}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${start}&endTs=${end}&agg=NONE&limit=5000`;
+
+  const res = await fetch(url,{headers:{ "X-Authorization":`Bearer ${JWT}` }});
+  return res.json();
+}
+
+/* ================= AGGREGATE ================= */
+function aggregate(rows){
+  const blocks = Array.from({length:6},()=>({
+    actual:0, expected:0, energy:0,
+    runtime:0, downtime:0, idle:0,
+    perf:[], avail:[], qual:[], oee:[]
+  }));
+
+  Object.values(rows).flat().forEach(p=>{
+    const i = blockIndex(p.ts);
+    const b = blocks[i];
+    b.actual += num(p.Meter_Run_Per_Min);
+    b.expected += num(p.deltaexpectedproduction);
+    b.energy += num(p.Consumption_Per_Min);
+    b.runtime += num(p.Runtime);
+    b.downtime += num(p.Downtime);
+    b.idle += num(p.Idletime);
+    if(p.deltaperformance!=null) b.perf.push(p.deltaperformance);
+    if(p.deltaavailability!=null) b.avail.push(p.deltaavailability);
+    if(p.deltaquality!=null) b.qual.push(p.deltaquality);
+    if(p.deltaoee!=null) b.oee.push(p.deltaoee);
+  });
+
+  return blocks.map(b=>{
+    const perfPct = b.expected ? (b.actual/b.expected)*100 : 0;
+    let status = "good";
+    if(b.downtime>60) status="critical";
+    else if(perfPct<90) status="warning";
+
+    return {
+      ...b,
+      perfPct,
+      status,
+      perf: avg(b.perf),
+      avail: avg(b.avail),
+      qual: avg(b.qual),
+      oee: avg(b.oee)
+    };
+  });
+}
+
+/* ================= UI ================= */
+function render(blocks){
+  const tl = document.getElementById("timeline");
+  const det = document.getElementById("details");
+  tl.innerHTML="";
+
+  blocks.forEach((b,i)=>{
+    const el = document.createElement("div");
+    el.className = `block ${b.status}`;
+    el.innerHTML = `
+      <div class="block-header">
+        <div class="time">${BLOCKS[i]}</div>
+        <div class="status">${b.status.toUpperCase()}</div>
+      </div>
+      <div class="metric">Performance<br><strong>${b.perfPct.toFixed(1)}%</strong></div>
+      <div class="metric">Downtime<br><strong>${b.downtime} min</strong></div>
+    `;
+
+    el.onclick = ()=>{
+      det.className = `details active ${b.status}`;
+      det.innerHTML = `
+        <h3>Time Block: ${BLOCKS[i]}</h3>
+        <div class="details-grid">
+          <div class="card"><h4>Actual Production</h4><div class="val">${b.actual}</div></div>
+          <div class="card"><h4>Expected Production</h4><div class="val">${b.expected}</div></div>
+          <div class="card"><h4>Energy</h4><div class="val">${b.energy.toFixed(1)}</div></div>
+          <div class="card"><h4>Runtime</h4><div class="val">${b.runtime} min</div></div>
+          <div class="card"><h4>Downtime</h4><div class="val">${b.downtime} min</div></div>
+          <div class="card"><h4>Idle Time</h4><div class="val">${b.idle} min</div></div>
+          <div class="card"><h4>Performance</h4><div class="val">${b.perf.toFixed(1)}%</div></div>
+          <div class="card"><h4>Availability</h4><div class="val">${b.avail.toFixed(1)}%</div></div>
+          <div class="card"><h4>Quality</h4><div class="val">${b.qual.toFixed(1)}%</div></div>
+          <div class="card"><h4>OEE</h4><div class="val">${b.oee.toFixed(1)}%</div></div>
+        </div>
+        <div class="insight">
+          ${b.status==="good" ? "Great job! Production is on track." :
+            b.status==="warning" ? "Close to target. Reducing minor stoppages will help." :
+            "Production is lagging. Focus on downtime reduction and speed stabilization."}
+        </div>
+      `;
+    };
+
+    tl.appendChild(el);
+  });
+}
+
+/* ================= INIT ================= */
+(async()=>{
+  if(!JWT) return alert("JWT token missing");
+  const raw = await fetchData();
+  const blocks = aggregate(raw);
+  render(blocks);
+})();
+</script>
+</body>
+</html>
