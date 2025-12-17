@@ -464,30 +464,37 @@ function setActive(btn){
   btn.classList.add("active");
 }
 
-btnToday.onclick=()=>{
+btnToday.onclick = () => {
   setActive(btnToday);
-  viewLabel.textContent="Viewing: Today";
+  viewLabel.textContent = "Viewing: Today";
   datePicker.style.display = "none";
   loadTimeline(new Date());
 };
 
-btnYesterday.onclick=()=>{
+btnYesterday.onclick = () => {
   setActive(btnYesterday);
-  const d=new Date(Date.now()-86400000);
+  const d = new Date(Date.now() - 86400000);
   datePicker.style.display = "none";
-  viewLabel.textContent="Viewing: Yesterday";
+  viewLabel.textContent = "Viewing: Yesterday";
   loadTimeline(d);
 };
 
-btnCustom.onclick
+/* 🔑 FIX: Custom Date button click handler */
+btnCustom.onclick = () => {
+  setActive(btnCustom);
+  datePicker.style.display = "inline-block";
+  datePicker.focus();
+};
 
-datePicker.onchange=e=>{
-  if(!e.target.value)return;
-  const d=new Date(e.target.value);
-  viewLabel.textContent=`Viewing: ${e.target.value}`;
+datePicker.onchange = e => {
+  if (!e.target.value) return;
+
+  const d = new Date(e.target.value);
+  viewLabel.textContent = `Viewing: ${e.target.value}`;
   datePicker.style.display = "none";
   loadTimeline(d);
 };
+
 
 /* ================= INIT ================= */
 (async()=>{
