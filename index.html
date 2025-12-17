@@ -187,7 +187,7 @@ body{
   margin-bottom:12px;
 }
 
-/* 🔹 SECTION TITLES (NEW) */
+/* ===== DETAILS SECTION TITLES ===== */
 .details-section-head{
   display:grid;
   grid-template-columns:1fr 1fr 1.5fr;
@@ -249,13 +249,14 @@ body{
     <div class="brand">Plantwiz</div>
     <div class="subtitle">Production Timeline</div>
   </div>
-  <div class="subtitle">Viewing: Today</div>
+  <div class="subtitle" id="viewLabel">Viewing: Today</div>
 </div>
 
 <div class="controls">
-  <div class="btn active">Current Day (Today)</div>
-  <div class="btn">Yesterday</div>
-  <div class="btn">Custom Date</div>
+  <div class="btn active" id="btnToday">Current Day (Today)</div>
+  <div class="btn" id="btnYesterday">Yesterday</div>
+  <div class="btn" id="btnCustom">Custom Date</div>
+  <input type="date" id="datePicker" style="display:none">
 </div>
 
 <div class="timeline-wrapper">
@@ -276,19 +277,22 @@ body{
 const API="https://plantwiz.pimateck.in/api";
 const DEVICE_ID="81261350-b886-11f0-87ea-b9809c1a7a9e";
 const KEYS=[
-"Meter_Run_Per_Min","Consumption_Per_Min","deltaexpectedproduction",
-"Runtime","Downtime","Idletime",
-"deltaperformance","deltaavailability","deltaquality","deltaoee"
+  "Meter_Run_Per_Min","Consumption_Per_Min","deltaexpectedproduction",
+  "Runtime","Downtime","Idletime",
+  "deltaperformance","deltaavailability","deltaquality","deltaoee"
 ];
 const BLOCKS=["00–04","04–08","08–12","12–16","16–20","20–24"];
 const JWT=new URLSearchParams(location.search).get("token");
+
+let activeIndex=null;
+let selectedDate=new Date();
 
 /* ================= HELPERS ================= */
 const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:0;
 
 /* ================= FETCH ================= */
-async function fetchData(){
-  const d=new Date();
+async function fetchData(date){
+  const d=new Date(date);
   const start=new Date(d.toDateString()).getTime();
   const end=start+86400000-1;
   const url=`${API}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${start}&endTs=${end}&agg=NONE&limit=5000`;
@@ -310,15 +314,12 @@ function mergeTelemetry(raw){
 
 /* ================= AGGREGATE ================= */
 function aggregate(rows){
-  const blocks=[...Array(6)].map(()=>({
-    actual:0,expected:0,runtime:0,downtime:0,p:[],o:[]
-  }));
+  const blocks=[...Array(6)].map(()=>({actual:0,expected:0,downtime:0,p:[],o:[]}));
   rows.forEach(p=>{
     const i=Math.floor(new Date(p.ts).getHours()/4);
     const b=blocks[i];
     b.actual+=p.Meter_Run_Per_Min||0;
     b.expected+=p.deltaexpectedproduction||0;
-    b.runtime+=p.Runtime||0;
     b.downtime+=p.Downtime||0;
     if(p.deltaperformance!=null)b.p.push(p.deltaperformance);
     if(p.deltaoee!=null)b.o.push(p.deltaoee);
@@ -331,8 +332,6 @@ function aggregate(rows){
     return{...b,s,perf:avg(b.p),oee:avg(b.o)};
   });
 }
-
-let activeIndex=null;
 
 /* ================= RENDER ================= */
 function render(blocks){
@@ -361,13 +360,15 @@ function render(blocks){
 function toggleDetails(blocks,i){
   const d=document.getElementById("details");
   const cards=[...document.querySelectorAll(".block")];
-  if(activeIndex===i){
-    closeDetails(); return;
-  }
+
+  if(activeIndex===i){ closeDetails(); return; }
+
   cards.forEach(c=>c.classList.remove("active"));
   cards[i].classList.add("active");
+
   const b=blocks[i];
   activeIndex=i;
+
   d.className=`details active ${b.s}`;
   d.innerHTML=`
     <div class="details-box ${b.s}">
@@ -427,25 +428,62 @@ function renderSummary(blocks){
 
 /* ================= TIME PIN ================= */
 function updateTime(blocks){
-  const now=new Date(Date.now()+19800000);
-  const m=now.getUTCHours()*60+now.getUTCMinutes();
+  const now=new Date();
+  const m=now.getHours()*60+now.getMinutes();
   const pct=(m/1440)*100;
   document.getElementById("time-pin").style.left=pct+"%";
   document.getElementById("timeline-progress").style.width=pct+"%";
-  const s=blocks[Math.floor(now.getUTCHours()/4)]?.s||"good";
+  const s=blocks[Math.floor(now.getHours()/4)]?.s||"good";
   document.querySelector(".pin-icon").className=`pin-icon pin-${s}`;
 }
 
-/* ================= INIT ================= */
-(async()=>{
-  if(!JWT) return alert("JWT missing");
-  const raw=await fetchData();
+/* ================= LOAD ================= */
+async function loadTimeline(date){
+  closeDetails();
+  selectedDate=date;
+  const raw=await fetchData(date);
   const rows=mergeTelemetry(raw);
   const blocks=aggregate(rows);
   render(blocks);
   renderSummary(blocks);
   updateTime(blocks);
-  setInterval(()=>updateTime(blocks),60000);
+}
+
+/* ================= BUTTONS ================= */
+function setActive(btn){
+  document.querySelectorAll(".btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+btnToday.onclick=()=>{
+  setActive(btnToday);
+  viewLabel.textContent="Viewing: Today";
+  loadTimeline(new Date());
+};
+
+btnYesterday.onclick=()=>{
+  setActive(btnYesterday);
+  const d=new Date(Date.now()-86400000);
+  viewLabel.textContent="Viewing: Yesterday";
+  loadTimeline(d);
+};
+
+btnCustom.onclick=()=>{
+  setActive(btnCustom);
+  datePicker.click();
+};
+
+datePicker.onchange=e=>{
+  if(!e.target.value)return;
+  const d=new Date(e.target.value);
+  viewLabel.textContent=`Viewing: ${e.target.value}`;
+  loadTimeline(d);
+};
+
+/* ================= INIT ================= */
+(async()=>{
+  if(!JWT) return alert("JWT missing");
+  await loadTimeline(new Date());
 })();
 </script>
 </body>
