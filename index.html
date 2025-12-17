@@ -534,28 +534,24 @@ function render(blocks){
 }
 
 /* ================= TOGGLE DETAILS ================= */
-function toggleDetails(blocks, i){
-  const d = document.getElementById("details");
-  const cards = [...document.querySelectorAll(".block")];
+function toggleDetails(blocks,i){
+  const d=document.getElementById("details");
+  const cards=[...document.querySelectorAll(".block")];
 
-  // Close if same block clicked
-  if (activeIndex === i) {
-    closeDetails();
-    return;
-  }
+  if(activeIndex===i){ closeDetails(); return; }
 
-  cards.forEach(c => c.classList.remove("active"));
+  cards.forEach(c=>c.classList.remove("active"));
   cards[i].classList.add("active");
 
-  const b = blocks[i];
-  activeIndex = i;
+  const b=blocks[i];
+  activeIndex=i;
 
-  d.className = `details active ${b.s}`;
-  d.innerHTML = `
+  d.className=`details active ${b.s}`;
+  d.innerHTML=`
     <div class="details-box ${b.s}">
       <div class="details-header">
         <strong>Time Block: ${BLOCKS[i]}</strong>
-        <span class="close-btn" onclick="closeDetails()">×</span>
+        <span style="cursor:pointer" onclick="closeDetails()">×</span>
       </div>
 
       <div class="details-section-head">
@@ -566,47 +562,32 @@ function toggleDetails(blocks, i){
 
       <div class="details-grid">
         <div class="info-box">
-          <strong>${b.actual >= b.expected ? "Ahead" : "Behind"} Target</strong><br>
-          ${Math.abs(Math.round(b.actual - b.expected))} mtr
+          <strong>${b.actual>=b.expected?"Ahead":"Behind"} Target</strong><br>
+          ${Math.abs(Math.round(b.actual-b.expected))} mtr
         </div>
-
         <div class="info-box">
           <strong>Total Downtime</strong><br>
           ${b.downtime} min
         </div>
-
         <div class="info-box">
-          ${
-            b.s === "good"
-              ? "Great job! Production is on track."
-              : b.s === "warning"
-              ? "You're close to target. Reduce minor stoppages."
-              : "Production is lagging. Focus on downtime reduction."
-          }
+          ${b.s==="good"
+            ?"Great job! Production is on track."
+            :b.s==="warning"
+            ?"You're close to target. Reduce minor stoppages."
+            :"Production is lagging. Focus on downtime reduction."}
         </div>
       </div>
 
-      <button class="cta" id="analysisBtn">View Detailed Analysis</button>
+      <button class="cta">View Detailed Analysis</button>
     </div>
   `;
-
-  // 🔑 THIS IS THE ONLY NEW LOGIC
-  const analysisBtn = document.getElementById("analysisBtn");
-  if (analysisBtn) {
-    analysisBtn.onclick = () => openAnalysis({
-      timeBlock: BLOCKS[i],
-      status: b.s,
-      actual: b.actual,
-      expected: b.expected,
-      performance: b.perf,
-      downtime: b.downtime,
-      availability: b.avail,
-      quality: b.qual,
-      oee: b.oee
-    });
-  }
 }
 
+function closeDetails(){
+  document.getElementById("details").classList.remove("active");
+  document.querySelectorAll(".block").forEach(b=>b.classList.remove("active"));
+  activeIndex=null;
+}
 
 /* ================= SUMMARY ================= */
 function renderSummary(blocks){
