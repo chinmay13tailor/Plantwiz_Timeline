@@ -60,7 +60,7 @@ body{
 /* ================= TIMELINE ================= */
 .timeline-wrapper{
   position:relative;
-  margin:26px 0 16px;
+  margin:26px 0 18px;
 }
 .timeline-line{
   height:4px;
@@ -140,6 +140,7 @@ body{
   border:2px solid #e5e7eb;
   background:#f9fafb;
   cursor:pointer;
+  transition:.2s ease;
 }
 .block.good{border-color:#22c55e;background:#f0fdf4}
 .block.warning{border-color:#f59e0b;background:#fffbeb}
@@ -158,17 +159,24 @@ body{
 .good .status{background:#22c55e}
 .warning .status{background:#f59e0b}
 .critical .status{background:#ef4444}
-.metric{margin-top:8px}
+.metric{margin-top:8px;font-size:14px}
+.chevron{
+  font-size:14px;
+  transition:.3s;
+}
+.block.active .chevron{
+  transform:rotate(180deg);
+}
 
-/* ================= DETAILS ================= */
+/* ================= DETAILS (SEPARATE BLOCK) ================= */
 .details{
   overflow:hidden;
   max-height:0;
   opacity:0;
-  transition:max-height .5s ease,opacity .4s ease;
+  transition:max-height .55s ease, opacity .4s ease;
 }
 .details.active{
-  max-height:500px;
+  max-height:320px;
   opacity:1;
 }
 .details-box{
@@ -180,25 +188,32 @@ body{
 .details.good{border-color:#22c55e;background:#f0fdf4}
 .details.warning{border-color:#f59e0b;background:#fffbeb}
 .details.critical{border-color:#ef4444;background:#fef2f2}
-.details-top{
+
+.details-header{
   display:flex;
   justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
 }
 .details-grid{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:1fr 1fr 1.5fr;
   gap:14px;
-  margin-top:14px;
 }
-.card{
+.info-box{
   background:#fff;
-  padding:12px;
+  padding:14px;
   border-radius:12px;
   border:1px solid #e5e7eb;
 }
-.insight{
+.cta{
   margin-top:14px;
-  font-weight:600;
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  padding:10px 16px;
+  border-radius:10px;
+  cursor:pointer;
 }
 
 /* ================= SUMMARY ================= */
@@ -206,7 +221,7 @@ body{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:16px;
-  margin-top:20px;
+  margin-top:22px;
 }
 .summary-card{
   padding:16px;
@@ -273,13 +288,13 @@ async function fetchData(){
   return r.json();
 }
 
-/* ================= MERGE (CRITICAL FIX) ================= */
+/* ================= MERGE ================= */
 function mergeTelemetry(raw){
   const map={};
-  Object.entries(raw).forEach(([key,arr])=>{
-    arr.forEach(p=>{
+  Object.entries(raw).forEach(([k,a])=>{
+    a.forEach(p=>{
       if(!map[p.ts]) map[p.ts]={ts:p.ts};
-      map[p.ts][key]=Number(p.value);
+      map[p.ts][k]=Number(p.value);
     });
   });
   return Object.values(map);
@@ -288,9 +303,8 @@ function mergeTelemetry(raw){
 /* ================= AGGREGATE ================= */
 function aggregate(rows){
   const blocks=[...Array(6)].map(()=>({
-    actual:0,expected:0,energy:0,
-    runtime:0,downtime:0,idle:0,
-    p:[],a:[],q:[],o:[]
+    actual:0,expected:0,runtime:0,downtime:0,
+    p:[],o:[]
   }));
 
   rows.forEach(p=>{
@@ -298,13 +312,9 @@ function aggregate(rows){
     const b=blocks[i];
     b.actual+=p.Meter_Run_Per_Min||0;
     b.expected+=p.deltaexpectedproduction||0;
-    b.energy+=p.Consumption_Per_Min||0;
     b.runtime+=p.Runtime||0;
     b.downtime+=p.Downtime||0;
-    b.idle+=p.Idletime||0;
     if(p.deltaperformance!=null)b.p.push(p.deltaperformance);
-    if(p.deltaavailability!=null)b.a.push(p.deltaavailability);
-    if(p.deltaquality!=null)b.q.push(p.deltaquality);
     if(p.deltaoee!=null)b.o.push(p.deltaoee);
   });
 
@@ -313,20 +323,18 @@ function aggregate(rows){
     let s="good";
     if(b.downtime>60)s="critical";
     else if(perfPct<90)s="warning";
-    return{
-      ...b,
-      s,
-      perf:avg(b.p),
-      oee:avg(b.o)
-    };
+    return{...b,s,perf:avg(b.p),oee:avg(b.o)};
   });
 }
+
+let activeIndex=null;
 
 /* ================= RENDER ================= */
 function render(blocks){
   const tl=document.getElementById("timeline");
   const dots=document.getElementById("dots");
-  tl.innerHTML="";dots.innerHTML="";
+  tl.innerHTML=""; dots.innerHTML="";
+
   blocks.forEach((b,i)=>{
     dots.innerHTML+=`<div class="dot ${b.s}"></div>`;
     const el=document.createElement("div");
@@ -334,80 +342,105 @@ function render(blocks){
     el.innerHTML=`
       <div class="block-header">
         <strong>${BLOCKS[i]}</strong>
-        <div class="status">${b.s.toUpperCase()}</div>
+        <span class="chevron">⌄</span>
       </div>
       <div class="metric">Performance ${b.perf.toFixed(1)}%</div>
       <div class="metric">${Math.round(b.actual)} / ${Math.round(b.expected)} mtr</div>
-      <div class="metric">Downtime ${b.downtime} min</div>`;
-    el.onclick=()=>toggleDetails(b,i);
+      <div class="metric">Downtime ${b.downtime} min</div>
+    `;
+    el.onclick=()=>toggleDetails(blocks,i);
     tl.appendChild(el);
   });
 }
 
-/* ================= DETAILS ================= */
-function toggleDetails(b,i){
+/* ================= TOGGLE DETAILS ================= */
+function toggleDetails(blocks,i){
   const d=document.getElementById("details");
+  const cards=[...document.querySelectorAll(".block")];
+
+  if(activeIndex===i){
+    d.classList.remove("active");
+    cards[i].classList.remove("active");
+    activeIndex=null;
+    return;
+  }
+
+  cards.forEach(c=>c.classList.remove("active"));
+  cards[i].classList.add("active");
+
+  const b=blocks[i];
+  activeIndex=i;
+
   d.className=`details active ${b.s}`;
   d.innerHTML=`
     <div class="details-box ${b.s}">
-      <div class="details-top">
+      <div class="details-header">
         <strong>Time Block: ${BLOCKS[i]}</strong>
-        <span style="cursor:pointer" onclick="document.getElementById('details').classList.remove('active')">×</span>
+        <span style="cursor:pointer" onclick="closeDetails()">×</span>
       </div>
       <div class="details-grid">
-        <div class="card">Actual<br><strong>${Math.round(b.actual)} mtr</strong></div>
-        <div class="card">Expected<br><strong>${Math.round(b.expected)} mtr</strong></div>
-        <div class="card">Energy<br><strong>${b.energy.toFixed(1)}</strong></div>
-        <div class="card">Runtime<br><strong>${b.runtime} min</strong></div>
-        <div class="card">Downtime<br><strong>${b.downtime} min</strong></div>
-        <div class="card">Idle<br><strong>${b.idle} min</strong></div>
+        <div class="info-box">
+          <strong>${b.actual>=b.expected?"Ahead":"Behind"} Target</strong><br>
+          ${Math.abs(Math.round(b.actual-b.expected))} mtr
+        </div>
+        <div class="info-box">
+          <strong>Total Downtime</strong><br>
+          ${b.downtime} min
+        </div>
+        <div class="info-box">
+          ${b.s==="good"
+            ?"Great job! Production is on track."
+            :b.s==="warning"
+            ?"You're close to target. Reduce minor stoppages."
+            :"Production is lagging. Focus on downtime reduction."}
+        </div>
       </div>
-      <div class="insight">
-        ${b.s==="good"?"Great job! Production is on track.":
-          b.s==="warning"?"You're close to target. Reduce minor stoppages.":
-          "Production is lagging. Focus on downtime reduction."}
-      </div>
-    </div>`;
+      <button class="cta">View Detailed Analysis</button>
+    </div>
+  `;
+}
+
+function closeDetails(){
+  document.getElementById("details").classList.remove("active");
+  document.querySelectorAll(".block").forEach(b=>b.classList.remove("active"));
+  activeIndex=null;
 }
 
 /* ================= SUMMARY ================= */
 function renderSummary(blocks){
-  const s=document.getElementById("summary");
   const exp=blocks.reduce((a,b)=>a+b.expected,0);
   const act=blocks.reduce((a,b)=>a+b.actual,0);
   const down=blocks.reduce((a,b)=>a+b.downtime,0);
   const oee=avg(blocks.map(b=>b.oee));
-  s.innerHTML=`
+  document.getElementById("summary").innerHTML=`
     <div class="summary-card">Total Expected<br><strong>${Math.round(exp)} mtr</strong></div>
     <div class="summary-card">Total Actual<br><strong>${Math.round(act)} mtr</strong></div>
     <div class="summary-card">Total Downtime<br><strong>${down} min</strong></div>
-    <div class="summary-card">Overall Status<br><strong>${oee.toFixed(1)}%</strong></div>`;
+    <div class="summary-card">Overall Status<br><strong>${oee.toFixed(1)}%</strong></div>
+  `;
 }
 
 /* ================= TIME PIN ================= */
-function updateTimeIndicator(blocks){
-  const pin=document.getElementById("time-pin");
-  const icon=pin.firstElementChild;
-  const prog=document.getElementById("timeline-progress");
+function updateTime(blocks){
   const now=new Date(Date.now()+19800000);
   const m=now.getUTCHours()*60+now.getUTCMinutes();
   const pct=(m/1440)*100;
-  pin.style.left=pct+"%";
-  prog.style.width=pct+"%";
+  document.getElementById("time-pin").style.left=pct+"%";
+  document.getElementById("timeline-progress").style.width=pct+"%";
   const s=blocks[Math.floor(now.getUTCHours()/4)]?.s||"good";
-  icon.className=`pin-icon pin-${s}`;
+  document.querySelector(".pin-icon").className=`pin-icon pin-${s}`;
 }
 
 /* ================= INIT ================= */
 (async()=>{
   if(!JWT) return alert("JWT missing");
   const raw=await fetchData();
-  const rows=mergeTelemetry(raw);   // ✅ FIX
+  const rows=mergeTelemetry(raw);
   const blocks=aggregate(rows);
   render(blocks);
   renderSummary(blocks);
-  updateTimeIndicator(blocks);
-  setInterval(()=>updateTimeIndicator(blocks),60000);
+  updateTime(blocks);
+  setInterval(()=>updateTime(blocks),60000);
 })();
 </script>
 </body>
