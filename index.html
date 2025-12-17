@@ -33,6 +33,7 @@ body{
   background:#fff;
   border-radius:18px;
   box-shadow:0 12px 40px rgba(0,0,0,.08);
+  position: relative;   
 }
 
 /* ================= HEADER ================= */
@@ -266,6 +267,9 @@ body{
 <body>
 
   <!-- ================= LOADING ================= -->
+
+
+<div class="container">
 <div id="loading" style="
   display:none;
   position:absolute;
@@ -283,9 +287,6 @@ body{
     Loading data…
   </div>
 </div>
-
-<div class="container">
-
 <div class="header">
   <div>
     <div class="brand">Plantwiz</div>
@@ -490,14 +491,22 @@ function hideLoading(){
 
 async function loadTimeline(date){
   closeDetails();
-  selectedDate=date;
-  const raw=await fetchData(date);
-  const rows=mergeTelemetry(raw);
-  const blocks=aggregate(rows);
-  render(blocks);
-  renderSummary(blocks);
-  updateTime(blocks);
+  selectedDate = date;
+
+  showLoading();                    // 🔑 ADD
+
+  try {
+    const raw = await fetchData(date);
+    const rows = mergeTelemetry(raw);
+    const blocks = aggregate(rows);
+    render(blocks);
+    renderSummary(blocks);
+    updateTime(blocks);
+  } finally {
+    hideLoading();                  // 🔑 ADD
+  }
 }
+
 
 /* ================= BUTTONS ================= */
 function setActive(btn){
