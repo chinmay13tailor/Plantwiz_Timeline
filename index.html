@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <title>Plantwiz | Production Timeline</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
-/* ===================== BASE ===================== */
+/* ================= BASE ================= */
 body{
   margin:0;
-  font-family:Inter,Segoe UI,Roboto,sans-serif;
+  font-family:"Segoe UI",Roboto,sans-serif;
   background:#f4f7fb;
+  color:#1f2937;
 }
 .container{
   max-width:1400px;
@@ -21,7 +22,7 @@ body{
   box-shadow:0 12px 40px rgba(0,0,0,.08);
 }
 
-/* ===================== HEADER ===================== */
+/* ================= HEADER ================= */
 .header{
   display:flex;
   justify-content:space-between;
@@ -37,11 +38,11 @@ body{
   color:#64748b;
 }
 
-/* ===================== CONTROLS ===================== */
+/* ================= CONTROLS ================= */
 .controls{
   display:flex;
   gap:10px;
-  margin:18px 0 10px;
+  margin-top:18px;
 }
 .btn{
   padding:8px 16px;
@@ -56,48 +57,78 @@ body{
   color:#fff;
 }
 
-/* Custom Date Picker */
-#datePicker{
-  display:none;
-  margin-bottom:16px;
-}
-#datePicker input{
-  padding:10px 14px;
-  border-radius:10px;
-  border:1px solid #cbd5e1;
-  font-size:14px;
-}
-
-/* ===================== TIMELINE LINE ===================== */
-.timeline-line{
+/* ================= TIMELINE ================= */
+.timeline-wrapper{
   position:relative;
-  height:6px;
+  margin:26px 0 18px;
+}
+.timeline-line{
+  height:4px;
   background:#e5e7eb;
-  border-radius:6px;
-  overflow:hidden;
-  margin-bottom:22px;
+  border-radius:2px;
 }
 .timeline-progress{
   position:absolute;
-  left:0;
   top:0;
-  height:100%;
+  left:0;
+  height:4px;
+  width:0%;
+  border-radius:2px;
   background:linear-gradient(90deg,#3b82f6,#60a5fa,#3b82f6);
-  background-size:200px 100%;
-  animation:flow 3s linear infinite;
+  background-size:200% 100%;
+  animation:flow 2.5s linear infinite;
 }
 @keyframes flow{
-  from{background-position:0 0}
-  to{background-position:200px 0}
+  0%{background-position:0% 50%}
+  100%{background-position:200% 50%}
 }
-.timeline-pin{
+.timeline-dots{
   position:absolute;
-  top:-14px;
-  transform:translateX(-50%);
-  font-size:20px;
+  top:-6px;
+  left:0;
+  right:0;
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
 }
+.dot{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  margin:auto;
+}
+.dot.good{background:#22c55e}
+.dot.warning{background:#f59e0b}
+.dot.critical{background:#ef4444}
 
-/* ===================== BLOCKS ===================== */
+/* ================= CURRENT TIME PIN ================= */
+.time-pin{
+  position:absolute;
+  top:-10px;
+  transform:translateX(-50%);
+  z-index:5;
+}
+.pin-icon{
+  width:20px;
+  height:20px;
+  border-radius:50% 50% 50% 0;
+  transform:rotate(-45deg);
+  position:relative;
+}
+.pin-icon::after{
+  content:"";
+  width:8px;
+  height:8px;
+  background:#fff;
+  border-radius:50%;
+  position:absolute;
+  top:6px;
+  left:6px;
+}
+.pin-good{background:#22c55e}
+.pin-warning{background:#f59e0b}
+.pin-critical{background:#ef4444}
+
+/* ================= BLOCKS ================= */
 .timeline{
   display:grid;
   grid-template-columns:repeat(6,1fr);
@@ -109,93 +140,103 @@ body{
   border:2px solid #e5e7eb;
   background:#f9fafb;
   cursor:pointer;
-  transition:.25s ease;
+  transition:.2s ease;
 }
-.block:hover{
-  transform:translateY(-4px);
-}
-.block.active{
-  transform:translateY(-6px);
-}
-
 .block.good{border-color:#22c55e;background:#f0fdf4}
 .block.warning{border-color:#f59e0b;background:#fffbeb}
 .block.critical{border-color:#ef4444;background:#fef2f2}
-
 .block-header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  font-weight:700;
-  font-size:14px;
 }
-.metric{
-  margin-top:8px;
-  font-size:13px;
-  color:#334155;
+.metric{margin-top:8px;font-size:14px}
+.chevron{
+  font-size:14px;
+  transition:.3s;
+}
+.block.active .chevron{
+  transform:rotate(180deg);
 }
 
-/* ===================== DETAILS SLIDE ===================== */
+/* ================= DETAILS ================= */
 .details{
   overflow:hidden;
   max-height:0;
-  transition:max-height .6s ease;
+  opacity:0;
+  transition:max-height .55s ease, opacity .4s ease;
 }
 .details.active{
-  max-height:420px;
-  margin-top:20px;
+  max-height:360px;
+  opacity:1;
 }
 .details-box{
+  margin-top:18px;
   border-radius:16px;
-  padding:20px;
+  padding:18px;
+  border:2px solid;
 }
-.details.good{border:2px solid #22c55e;background:#ecfdf5}
-.details.warning{border:2px solid #f59e0b;background:#fffbeb}
-.details.critical{border:2px solid #ef4444;background:#fef2f2}
+.details.good{border-color:#22c55e;background:#f0fdf4}
+.details.warning{border-color:#f59e0b;background:#fffbeb}
+.details.critical{border-color:#ef4444;background:#fef2f2}
 
 .details-header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  font-weight:700;
   margin-bottom:12px;
 }
-.details-header button{
-  background:none;
-  border:none;
-  font-size:18px;
-  cursor:pointer;
+
+/* ===== DETAILS SECTION TITLES ===== */
+.details-section-head{
+  display:grid;
+  grid-template-columns:1fr 1fr 1.5fr;
+  gap:14px;
+  margin-bottom:10px;
+  font-size:13px;
+  font-weight:600;
+  color:#334155;
+}
+.details-section-head span{
+  display:flex;
+  align-items:center;
+  gap:6px;
 }
 
 .details-grid{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:1fr 1fr 1.5fr;
   gap:14px;
 }
-.section-title{
-  font-size:13px;
-  font-weight:600;
-  color:#475569;
-  margin-bottom:6px;
-}
-.card{
+.info-box{
   background:#fff;
-  border-radius:12px;
   padding:14px;
+  border-radius:12px;
   border:1px solid #e5e7eb;
-  font-size:14px;
+}
+.cta{
+  margin-top:14px;
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  padding:10px 16px;
+  border-radius:10px;
+  cursor:pointer;
 }
 
-/* ===================== SUMMARY ===================== */
+/* ================= SUMMARY ================= */
 .summary{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:16px;
   margin-top:22px;
 }
-.summary .card{
+.summary-card{
+  padding:16px;
+  border-radius:14px;
+  background:#f8fafc;
+  border:1px solid #e5e7eb;
   text-align:center;
-  font-weight:600;
 }
 </style>
 </head>
@@ -203,198 +244,247 @@ body{
 <body>
 <div class="container">
 
-  <div class="header">
-    <div>
-      <div class="brand">Plantwiz</div>
-      <div class="subtitle">Production Timeline</div>
-    </div>
-    <div class="subtitle" id="viewLabel">Viewing: Today</div>
+<div class="header">
+  <div>
+    <div class="brand">Plantwiz</div>
+    <div class="subtitle">Production Timeline</div>
   </div>
+  <div class="subtitle" id="viewLabel">Viewing: Today</div>
+</div>
 
-  <div class="controls">
-    <button class="btn active" id="btnToday">Current Day (Today)</button>
-    <button class="btn" id="btnYesterday">Yesterday</button>
-    <button class="btn" id="btnCustom">Custom Date</button>
-  </div>
+<div class="controls">
+  <div class="btn active" id="btnToday">Current Day (Today)</div>
+  <div class="btn" id="btnYesterday">Yesterday</div>
+  <div class="btn" id="btnCustom">Custom Date</div>
+  <input type="date" id="datePicker" style="display:none">
+</div>
 
-  <div id="datePicker">
-    <input type="date" id="customDate">
-  </div>
+<div class="timeline-wrapper">
+  <div class="timeline-line"></div>
+  <div id="timeline-progress" class="timeline-progress"></div>
+  <div id="time-pin" class="time-pin"><div class="pin-icon"></div></div>
+  <div id="dots" class="timeline-dots"></div>
+</div>
 
-  <div class="timeline-line">
-    <div class="timeline-progress" id="progress"></div>
-    <div class="timeline-pin" id="pin">📍</div>
-  </div>
-
-  <div class="timeline" id="timeline"></div>
-  <div class="details" id="details"></div>
-  <div class="summary" id="summary"></div>
+<div id="timeline" class="timeline"></div>
+<div id="details" class="details"></div>
+<div id="summary" class="summary"></div>
 
 </div>
 
 <script>
-/* ===================== CONFIG ===================== */
-const API_BASE="https://plantwiz.pimateck.in/api";
+/* ================= CONFIG ================= */
+const API="https://plantwiz.pimateck.in/api";
 const DEVICE_ID="81261350-b886-11f0-87ea-b9809c1a7a9e";
 const KEYS=[
- "Meter_Run_Per_Min","Consumption_Per_Min","deltaexpectedproduction",
- "Runtime","Downtime","Idletime",
- "deltaperformance","deltaavailability","deltaquality","deltaoee"
+  "Meter_Run_Per_Min","Consumption_Per_Min","deltaexpectedproduction",
+  "Runtime","Downtime","Idletime",
+  "deltaperformance","deltaavailability","deltaquality","deltaoee"
 ];
 const BLOCKS=["00–04","04–08","08–12","12–16","16–20","20–24"];
-
 const JWT=new URLSearchParams(location.search).get("token");
-if(!JWT){alert("JWT token missing");}
 
 let activeIndex=null;
-let selectedMode="today";
+let selectedDate=new Date();
 
-/* ===================== DATE HELPERS ===================== */
-function getDayRange(d){
-  const s=new Date(d); s.setHours(0,0,0,0);
-  const e=new Date(d); e.setHours(23,59,59,999);
-  return {startTs:s.getTime(),endTs:e.getTime()};
-}
+/* ================= HELPERS ================= */
+const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:0;
 
-/* ===================== FETCH ===================== */
-async function fetchTelemetry(range){
-  const url=`${API_BASE}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${range.startTs}&endTs=${range.endTs}&agg=NONE&limit=5000`;
-  const r=await fetch(url,{headers:{'X-Authorization':`Bearer ${JWT}`}});
+/* ================= FETCH ================= */
+async function fetchData(date){
+  const d=new Date(date);
+  const start=new Date(d.toDateString()).getTime();
+  const end=start+86400000-1;
+  const url=`${API}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${start}&endTs=${end}&agg=NONE&limit=5000`;
+  const r=await fetch(url,{headers:{ "X-Authorization":`Bearer ${JWT}` }});
   return r.json();
 }
 
-/* ===================== AGGREGATION ===================== */
-function aggregate(rows){
-  const blocks=Array.from({length:6},()=>({
-    actual:0,expected:0,downtime:0,oee:[]
-  }));
-
-  Object.values(rows).flat().forEach(p=>{
-    const i=Math.floor(new Date(p.ts).getHours()/4);
-    blocks[i].actual+=+p.Meter_Run_Per_Min||0;
-    blocks[i].expected+=+p.deltaexpectedproduction||0;
-    blocks[i].downtime+=+p.Downtime||0;
-    if(p.deltaoee!=null) blocks[i].oee.push(+p.deltaoee);
+/* ================= MERGE ================= */
+function mergeTelemetry(raw){
+  const map={};
+  Object.entries(raw).forEach(([k,a])=>{
+    a.forEach(p=>{
+      if(!map[p.ts]) map[p.ts]={ts:p.ts};
+      map[p.ts][k]=Number(p.value);
+    });
   });
+  return Object.values(map);
+}
 
+/* ================= AGGREGATE ================= */
+function aggregate(rows){
+  const blocks=[...Array(6)].map(()=>({actual:0,expected:0,downtime:0,p:[],o:[]}));
+  rows.forEach(p=>{
+    const i=Math.floor(new Date(p.ts).getHours()/4);
+    const b=blocks[i];
+    b.actual+=p.Meter_Run_Per_Min||0;
+    b.expected+=p.deltaexpectedproduction||0;
+    b.downtime+=p.Downtime||0;
+    if(p.deltaperformance!=null)b.p.push(p.deltaperformance);
+    if(p.deltaoee!=null)b.o.push(p.deltaoee);
+  });
   return blocks.map(b=>{
-    const perf=b.expected?b.actual/b.expected*100:0;
-    let status="good";
-    if(b.downtime>60) status="critical";
-    else if(perf<90) status="warning";
-    return {
-      ...b,
-      perf,
-      status,
-      oee:b.oee.length?b.oee.reduce((a,c)=>a+c,0)/b.oee.length:0
-    };
+    const perfPct=b.expected?(b.actual/b.expected)*100:0;
+    let s="good";
+    if(b.downtime>60)s="critical";
+    else if(perfPct<90)s="warning";
+    return{...b,s,perf:avg(b.p),oee:avg(b.o)};
   });
 }
 
-/* ===================== RENDER ===================== */
-function renderTimeline(blocks){
+/* ================= RENDER ================= */
+function render(blocks){
   const tl=document.getElementById("timeline");
-  tl.innerHTML="";
+  const dots=document.getElementById("dots");
+  tl.innerHTML=""; dots.innerHTML="";
   blocks.forEach((b,i)=>{
+    dots.innerHTML+=`<div class="dot ${b.s}"></div>`;
     const el=document.createElement("div");
-    el.className=`block ${b.status} ${activeIndex===i?"active":""}`;
+    el.className=`block ${b.s}`;
     el.innerHTML=`
-      <div class="block-header">${BLOCKS[i]} <span>▾</span></div>
+      <div class="block-header">
+        <strong>${BLOCKS[i]}</strong>
+        <span class="chevron">⌄</span>
+      </div>
       <div class="metric">Performance ${b.perf.toFixed(1)}%</div>
       <div class="metric">${Math.round(b.actual)} / ${Math.round(b.expected)} mtr</div>
-      <div class="metric">Downtime ${b.downtime} min</div>`;
+      <div class="metric">Downtime ${b.downtime} min</div>
+    `;
     el.onclick=()=>toggleDetails(blocks,i);
     tl.appendChild(el);
   });
 }
 
-/* ===================== DETAILS ===================== */
+/* ================= TOGGLE DETAILS ================= */
 function toggleDetails(blocks,i){
   const d=document.getElementById("details");
-  if(activeIndex===i){
-    d.classList.remove("active");
-    activeIndex=null;
-    return;
-  }
-  activeIndex=i;
+  const cards=[...document.querySelectorAll(".block")];
+
+  if(activeIndex===i){ closeDetails(); return; }
+
+  cards.forEach(c=>c.classList.remove("active"));
+  cards[i].classList.add("active");
+
   const b=blocks[i];
-  d.className=`details active`;
+  activeIndex=i;
+
+  d.className=`details active ${b.s}`;
   d.innerHTML=`
-    <div class="details-box ${b.status}">
+    <div class="details-box ${b.s}">
       <div class="details-header">
-        Time Block: ${BLOCKS[i]}
-        <button onclick="toggleDetails([],${i})">✕</button>
+        <strong>Time Block: ${BLOCKS[i]}</strong>
+        <span style="cursor:pointer" onclick="closeDetails()">×</span>
       </div>
+
+      <div class="details-section-head">
+        <span>📊 Production Status</span>
+        <span>⏱ Downtime Status</span>
+        <span>💡 Quick Insight</span>
+      </div>
+
       <div class="details-grid">
-        <div>
-          <div class="section-title">Production Status</div>
-          <div class="card">${Math.round(Math.abs(b.actual-b.expected))} mtr ${b.actual>=b.expected?"Ahead":"Behind"} Target</div>
+        <div class="info-box">
+          <strong>${b.actual>=b.expected?"Ahead":"Behind"} Target</strong><br>
+          ${Math.abs(Math.round(b.actual-b.expected))} mtr
         </div>
-        <div>
-          <div class="section-title">Downtime Status</div>
-          <div class="card">${b.downtime} min</div>
+        <div class="info-box">
+          <strong>Total Downtime</strong><br>
+          ${b.downtime} min
         </div>
-        <div>
-          <div class="section-title">Quick Insight</div>
-          <div class="card">${b.status==="good"?"Great job! Production is on track.":"Focus on reducing downtime."}</div>
+        <div class="info-box">
+          ${b.s==="good"
+            ?"Great job! Production is on track."
+            :b.s==="warning"
+            ?"You're close to target. Reduce minor stoppages."
+            :"Production is lagging. Focus on downtime reduction."}
         </div>
       </div>
-    </div>`;
-  renderTimeline(blocks);
+
+      <button class="cta">View Detailed Analysis</button>
+    </div>
+  `;
 }
 
-/* ===================== SUMMARY ===================== */
+function closeDetails(){
+  document.getElementById("details").classList.remove("active");
+  document.querySelectorAll(".block").forEach(b=>b.classList.remove("active"));
+  activeIndex=null;
+}
+
+/* ================= SUMMARY ================= */
 function renderSummary(blocks){
   const exp=blocks.reduce((a,b)=>a+b.expected,0);
   const act=blocks.reduce((a,b)=>a+b.actual,0);
-  const dt=blocks.reduce((a,b)=>a+b.downtime,0);
-  const oee=blocks.reduce((a,b)=>a+b.oee,0)/blocks.length;
+  const down=blocks.reduce((a,b)=>a+b.downtime,0);
+  const oee=avg(blocks.map(b=>b.oee));
   document.getElementById("summary").innerHTML=`
-    <div class="card">Total Expected<br>${Math.round(exp)} mtr</div>
-    <div class="card">Total Actual<br>${Math.round(act)} mtr</div>
-    <div class="card">Total Downtime<br>${dt} min</div>
-    <div class="card">Overall Status<br>${oee.toFixed(1)}%</div>`;
+    <div class="summary-card">Total Expected<br><strong>${Math.round(exp)} mtr</strong></div>
+    <div class="summary-card">Total Actual<br><strong>${Math.round(act)} mtr</strong></div>
+    <div class="summary-card">Total Downtime<br><strong>${down} min</strong></div>
+    <div class="summary-card">Overall Status<br><strong>${oee.toFixed(1)}%</strong></div>
+  `;
 }
 
-/* ===================== LOAD ===================== */
-async function load(range,label){
-  document.getElementById("viewLabel").innerText="Viewing: "+label;
-  const raw=await fetchTelemetry(range);
-  const blocks=aggregate(raw);
-  renderTimeline(blocks);
+/* ================= TIME PIN ================= */
+function updateTime(blocks){
+  const now=new Date();
+  const m=now.getHours()*60+now.getMinutes();
+  const pct=(m/1440)*100;
+  document.getElementById("time-pin").style.left=pct+"%";
+  document.getElementById("timeline-progress").style.width=pct+"%";
+  const s=blocks[Math.floor(now.getHours()/4)]?.s||"good";
+  document.querySelector(".pin-icon").className=`pin-icon pin-${s}`;
+}
+
+/* ================= LOAD ================= */
+async function loadTimeline(date){
+  closeDetails();
+  selectedDate=date;
+  const raw=await fetchData(date);
+  const rows=mergeTelemetry(raw);
+  const blocks=aggregate(rows);
+  render(blocks);
   renderSummary(blocks);
+  updateTime(blocks);
 }
 
-/* ===================== BUTTONS ===================== */
-btnToday.onclick=()=>{
-  setActive(btnToday);
-  datePicker.style.display="none";
-  selectedMode="today";
-  load(getDayRange(new Date()),"Today");
-};
-btnYesterday.onclick=()=>{
-  setActive(btnYesterday);
-  datePicker.style.display="none";
-  selectedMode="yesterday";
-  const d=new Date(); d.setDate(d.getDate()-1);
-  load(getDayRange(d),"Yesterday");
-};
-btnCustom.onclick=()=>{
-  setActive(btnCustom);
-  datePicker.style.display="block";
-};
-customDate.onchange=()=>{
-  selectedMode="custom";
-  load(getDayRange(customDate.value),"Custom Date");
-};
-
+/* ================= BUTTONS ================= */
 function setActive(btn){
   document.querySelectorAll(".btn").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
 }
 
-/* ===================== INIT ===================== */
-btnToday.click();
+btnToday.onclick=()=>{
+  setActive(btnToday);
+  viewLabel.textContent="Viewing: Today";
+  loadTimeline(new Date());
+};
+
+btnYesterday.onclick=()=>{
+  setActive(btnYesterday);
+  const d=new Date(Date.now()-86400000);
+  viewLabel.textContent="Viewing: Yesterday";
+  loadTimeline(d);
+};
+
+btnCustom.onclick=()=>{
+  setActive(btnCustom);
+  datePicker.click();
+};
+
+datePicker.onchange=e=>{
+  if(!e.target.value)return;
+  const d=new Date(e.target.value);
+  viewLabel.textContent=`Viewing: ${e.target.value}`;
+  loadTimeline(d);
+};
+
+/* ================= INIT ================= */
+(async()=>{
+  if(!JWT) return alert("JWT missing");
+  await loadTimeline(new Date());
+})();
 </script>
 </body>
 </html>
