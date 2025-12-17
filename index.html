@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* ===== BASE ===== */
+/* ================= BASE ================= */
 body{
   margin:0;
   font-family:"Segoe UI",Roboto,sans-serif;
@@ -21,12 +21,12 @@ body{
   box-shadow:0 16px 40px rgba(0,0,0,.1);
 }
 
-/* ===== HEADER ===== */
+/* ================= HEADER ================= */
 .header{display:flex;justify-content:space-between;align-items:center;}
 .brand{font-size:22px;font-weight:700;color:#2563eb;}
 .subtitle{font-size:14px;color:#64748b}
 
-/* ===== CONTROLS ===== */
+/* ================= CONTROLS ================= */
 .controls{display:flex;gap:10px;margin-top:16px}
 .btn{
   padding:8px 18px;border-radius:12px;
@@ -34,7 +34,7 @@ body{
 }
 .btn.active{background:#2563eb;color:#fff}
 
-/* ===== TIMELINE LINE ===== */
+/* ================= TIMELINE LINE ================= */
 .timeline-wrapper{position:relative;margin-top:28px}
 .timeline-line{
   position:absolute;top:14px;left:0;right:0;
@@ -51,7 +51,7 @@ body{
 .dot.warning{background:#f59e0b}
 .dot.critical{background:#ef4444}
 
-/* ===== BLOCKS ===== */
+/* ================= BLOCKS ================= */
 .timeline{
   display:grid;grid-template-columns:repeat(6,1fr);
   gap:14px;margin-top:28px
@@ -65,10 +65,7 @@ body{
 .block.good{border-color:#22c55e;background:#f0fdf4}
 .block.warning{border-color:#f59e0b;background:#fffbeb}
 .block.critical{border-color:#ef4444;background:#fef2f2}
-
-.block.selected{
-  box-shadow:0 0 0 3px rgba(37,99,235,.25)
-}
+.block.selected{box-shadow:0 0 0 3px rgba(37,99,235,.25)}
 
 .block-header{
   display:flex;justify-content:space-between;align-items:center
@@ -81,14 +78,13 @@ body{
 .good .status-pill{background:#22c55e}
 .warning .status-pill{background:#f59e0b}
 .critical .status-pill{background:#ef4444}
-
 .chevron{font-size:14px;transition:.2s}
 .block.selected .chevron{transform:rotate(180deg)}
 
 .metric{margin-top:8px;font-size:13px;color:#334155}
 .metric strong{font-size:18px;color:#0f172a}
 
-/* ===== DETAIL PANEL ===== */
+/* ================= DETAIL PANEL ================= */
 .detail{
   display:none;margin-top:26px;
   border-radius:18px;padding:18px;
@@ -121,6 +117,34 @@ body{
   padding:10px 18px;border-radius:12px;
   font-weight:600;display:inline-block
 }
+
+/* ================= SUMMARY ================= */
+.summary{
+  margin-top:26px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
+.sum-card{
+  background:#fff;
+  border-radius:16px;
+  padding:16px;
+  border:1px solid #e5e7eb;
+  text-align:center;
+}
+.sum-card h4{
+  margin:0;
+  font-size:13px;
+  color:#64748b;
+}
+.sum-card .val{
+  margin-top:8px;
+  font-size:22px;
+  font-weight:800;
+}
+.sum-card.green{background:#f0fdf4;border-color:#22c55e}
+.sum-card.yellow{background:#fffbeb;border-color:#f59e0b}
+.sum-card.red{background:#fef2f2;border-color:#ef4444}
 </style>
 </head>
 
@@ -151,12 +175,21 @@ body{
 <!-- DETAIL PANEL -->
 <div id="detail" class="detail"></div>
 
+<!-- SUMMARY -->
+<div id="summary" class="summary"></div>
+
 </div>
 
 <script>
 const API_BASE="https://plantwiz.pimateck.in/api";
 const DEVICE_ID="81261350-b886-11f0-87ea-b9809c1a7a9e";
-const KEYS=["Meter_Run_Per_Min","deltaexpectedproduction","Downtime","deltaperformance"];
+const KEYS=[
+  "Meter_Run_Per_Min",
+  "deltaexpectedproduction",
+  "Downtime",
+  "deltaperformance",
+  "deltaoee"
+];
 const BLOCKS=["00–04","04–08","08–12","12–16","16–20","20–24"];
 const JWT=new URLSearchParams(location.search).get("token");
 
@@ -202,6 +235,22 @@ function aggregate(rows){
  });
 }
 
+function calculateTotals(rows){
+ let totalExpected=0,totalActual=0,totalDowntime=0,oee=[];
+ rows.forEach(r=>{
+  totalExpected+=num(r.deltaexpectedproduction);
+  totalActual+=num(r.Meter_Run_Per_Min);
+  totalDowntime+=num(r.Downtime);
+  if(r.deltaoee!=null)oee.push(r.deltaoee);
+ });
+ return{
+  totalExpected,
+  totalActual,
+  totalDowntime,
+  avgOEE:avg(oee)
+ };
+}
+
 let activeIndex=null;
 
 function render(blocks){
@@ -243,7 +292,7 @@ function render(blocks){
     detail.style.display="block";
     detail.innerHTML=`
       <div class="detail-header">
-        <div class="detail-title">Time Block: ${BLOCKS[i]} &nbsp;|&nbsp; Status: ${b.s.toUpperCase()}</div>
+        <div class="detail-title">Time Block: ${BLOCKS[i]} | Status: ${b.s.toUpperCase()}</div>
         <div class="close-btn">✕</div>
       </div>
       <div class="detail-grid">
@@ -260,7 +309,7 @@ function render(blocks){
           <div class="val">${
             b.s==="good"?"Great job! Production is on track.":
             b.s==="warning"?"You're close to target. Reduce minor stoppages.":
-            "High downtime detected. Immediate action required."
+            "Production is lagging. Focus on reducing downtime."
           }</div>
         </div>
       </div>
@@ -272,9 +321,38 @@ function render(blocks){
       activeIndex=null;
     };
   };
-
   tl.appendChild(el);
  });
+}
+
+function renderSummary(t){
+ const s=document.getElementById("summary");
+ let cls="green";
+ if(t.avgOEE<80)cls="red";
+ else if(t.avgOEE<90)cls="yellow";
+
+ s.innerHTML=`
+  <div class="sum-card">
+    <h4>Total Expected</h4>
+    <div class="val">${t.totalExpected.toLocaleString()}</div>
+    <div class="subtitle">pieces</div>
+  </div>
+  <div class="sum-card">
+    <h4>Total Actual</h4>
+    <div class="val">${t.totalActual.toLocaleString()}</div>
+    <div class="subtitle">pieces</div>
+  </div>
+  <div class="sum-card yellow">
+    <h4>Total Downtime</h4>
+    <div class="val">${t.totalDowntime}</div>
+    <div class="subtitle">minutes</div>
+  </div>
+  <div class="sum-card ${cls}">
+    <h4>Overall Status</h4>
+    <div class="val">${t.avgOEE.toFixed(1)}%</div>
+    <div class="subtitle">efficiency</div>
+  </div>
+ `;
 }
 
 (async()=>{
@@ -283,6 +361,8 @@ function render(blocks){
  const rows=merge(raw);
  const blocks=aggregate(rows);
  render(blocks);
+ const totals=calculateTotals(rows);
+ renderSummary(totals);
 })();
 </script>
 </body>
