@@ -317,67 +317,87 @@ body{
 </div>
 
   <!-- ================= DETAILED ANALYSIS MODAL ================= -->
-<div id="analysisModal" style="
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.55);
-  z-index:9999;
+<div id="daHeader" class="da-header">
+  <div class="da-left">
+    <div class="da-icon">📊</div>
+    <div>
+      <div class="da-title">Detailed Analysis</div>
+      <div id="modalTime" class="da-subtitle"></div>
+    </div>
+  </div>
+
+  <div class="da-right">
+    <span id="modalStatus" class="da-status">Status</span>
+    <span class="da-close" onclick="closeAnalysis()">×</span>
+  </div>
+</div>
+/* ===== Detailed Analysis Header ===== */
+.da-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 20px;
+  border-radius:16px 16px 0 0;
+  margin-bottom:10px;
+}
+
+.da-left {
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.da-icon {
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  background:#fff;
+  display:flex;
   align-items:center;
   justify-content:center;
-">
-  <div style="
-    width:680px;
-    max-height:90vh;
-    background:#fff;
-    border-radius:16px;
-    overflow:auto;
-    box-shadow:0 20px 50px rgba(0,0,0,.3);
-  ">
+  font-size:20px;
+  box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
 
-    <div style="
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:16px 20px;
-      border-bottom:1px solid #e5e7eb;
-    ">
-      <div>
-        <div style="font-weight:700">Detailed Analysis</div>
-        <div id="modalTime" style="font-size:13px;color:#64748b"></div>
-      </div>
-      <button onclick="closeAnalysis()" style="
-        border:none;
-        background:none;
-        font-size:22px;
-        cursor:pointer;
-      ">×</button>
-    </div>
+.da-title {
+  font-weight:700;
+  font-size:18px;
+}
 
-    <div id="modalStatus" style="
-      margin:14px 20px;
-      padding:6px 12px;
-      border-radius:20px;
-      font-weight:600;
-      width:fit-content;
-    ">Status</div>
+.da-subtitle {
+  font-size:13px;
+  color:#64748b;
+}
 
-    <div style="padding:16px 20px">
-      <h4>Key Metrics</h4>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-        <div><strong id="mPerformance">0%</strong><br>Performance</div>
-        <div><strong id="mActual">0</strong><br>Actual</div>
-        <div><strong id="mDowntime">0</strong><br>Downtime</div>
-      </div>
-    </div>
+.da-right {
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
 
-    <div style="padding:0 20px 20px">
-      <h4>Insight</h4>
-      <p id="modalReason"></p>
-      <ul id="modalFindings"></ul>
-    </div>
+.da-status {
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+}
 
-  </div>
+.da-close {
+  font-size:22px;
+  cursor:pointer;
+  color:#64748b;
+}
+
+/* Status Colors */
+.good .da-header { background:#ecfdf3; }
+.good .da-status { background:#dcfce7; color:#15803d; }
+
+.warning .da-header { background:#fff7ed; }
+.warning .da-status { background:#ffedd5; color:#c2410c; }
+
+.critical .da-header { background:#fef2f2; }
+.critical .da-status { background:#fee2e2; color:#b91c1c; }
+
 </div>
 
 
@@ -641,6 +661,10 @@ function openAnalysis(block){
     <li>Performance: ${block.perf.toFixed(1)}%</li>
     <li>Downtime: ${block.downtime} minutes</li>
   `;
+
+  analysisModal.querySelector(".da-header")
+  .className = "da-header " + block.s;
+
 }
 
 function closeAnalysis(){
