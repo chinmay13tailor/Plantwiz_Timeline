@@ -467,12 +467,14 @@ function setActive(btn){
 btnToday.onclick=()=>{
   setActive(btnToday);
   viewLabel.textContent="Viewing: Today";
+  datePicker.style.display = "none";
   loadTimeline(new Date());
 };
 
 btnYesterday.onclick=()=>{
   setActive(btnYesterday);
   const d=new Date(Date.now()-86400000);
+  datePicker.style.display = "none";
   viewLabel.textContent="Viewing: Yesterday";
   loadTimeline(d);
 };
