@@ -261,6 +261,92 @@ body{
   border:1px solid #e5e7eb;
   text-align:center;
 }
+
+
+  */=======Detail POPUP Window======*/
+
+  /* ================= MODAL ================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal {
+  width: 680px;
+  max-height: 90vh;
+  background: #fff;
+  border-radius: 14px;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0,0,0,.3);
+  animation: slideUp .3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-title {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.modal-icon {
+  font-size: 22px;
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.modal-status {
+  margin: 12px 20px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  width: fit-content;
+  font-weight: 600;
+}
+
+.modal-section {
+  padding: 16px 20px;
+}
+
+.modal-metrics {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 12px;
+}
+
+.metric-card {
+  background: #f8f9fb;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.zone-box {
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
 </style>
 </head>
 
@@ -314,6 +400,54 @@ body{
 <div id="summary" class="summary"></div>
 
 </div>
+
+  /*==========Detail-POPup Window===========*/
+  <!-- ================= DETAILED ANALYSIS MODAL ================= -->
+<div id="analysisModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="modal-icon">📊</span>
+        <div>
+          <div id="modalTitle">Detailed Analysis</div>
+          <small id="modalTime">Time Block</small>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeAnalysis()">×</button>
+    </div>
+
+    <div class="modal-status" id="modalStatus">Status</div>
+
+    <div class="modal-section">
+      <h4>Key Performance Metrics</h4>
+      <div class="modal-metrics">
+        <div class="metric-card">
+          <label>Performance</label>
+          <strong id="mPerformance">0%</strong>
+        </div>
+        <div class="metric-card">
+          <label>Actual Production</label>
+          <strong id="mActual">0 mtr</strong>
+        </div>
+        <div class="metric-card">
+          <label>Downtime</label>
+          <strong id="mDowntime">0 min</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h4>Zone Classification</h4>
+      <div id="modalReason" class="zone-box"></div>
+    </div>
+
+    <div class="modal-section">
+      <h4>Detailed Findings</h4>
+      <ul id="modalFindings"></ul>
+    </div>
+  </div>
+</div>
+
 
 <script>
 /* ================= CONFIG ================= */
@@ -400,24 +534,28 @@ function render(blocks){
 }
 
 /* ================= TOGGLE DETAILS ================= */
-function toggleDetails(blocks,i){
-  const d=document.getElementById("details");
-  const cards=[...document.querySelectorAll(".block")];
+function toggleDetails(blocks, i){
+  const d = document.getElementById("details");
+  const cards = [...document.querySelectorAll(".block")];
 
-  if(activeIndex===i){ closeDetails(); return; }
+  // Close if same block clicked
+  if (activeIndex === i) {
+    closeDetails();
+    return;
+  }
 
-  cards.forEach(c=>c.classList.remove("active"));
+  cards.forEach(c => c.classList.remove("active"));
   cards[i].classList.add("active");
 
-  const b=blocks[i];
-  activeIndex=i;
+  const b = blocks[i];
+  activeIndex = i;
 
-  d.className=`details active ${b.s}`;
-  d.innerHTML=`
+  d.className = `details active ${b.s}`;
+  d.innerHTML = `
     <div class="details-box ${b.s}">
       <div class="details-header">
         <strong>Time Block: ${BLOCKS[i]}</strong>
-        <span style="cursor:pointer" onclick="closeDetails()">×</span>
+        <span class="close-btn" onclick="closeDetails()">×</span>
       </div>
 
       <div class="details-section-head">
@@ -428,32 +566,47 @@ function toggleDetails(blocks,i){
 
       <div class="details-grid">
         <div class="info-box">
-          <strong>${b.actual>=b.expected?"Ahead":"Behind"} Target</strong><br>
-          ${Math.abs(Math.round(b.actual-b.expected))} mtr
+          <strong>${b.actual >= b.expected ? "Ahead" : "Behind"} Target</strong><br>
+          ${Math.abs(Math.round(b.actual - b.expected))} mtr
         </div>
+
         <div class="info-box">
           <strong>Total Downtime</strong><br>
           ${b.downtime} min
         </div>
+
         <div class="info-box">
-          ${b.s==="good"
-            ?"Great job! Production is on track."
-            :b.s==="warning"
-            ?"You're close to target. Reduce minor stoppages."
-            :"Production is lagging. Focus on downtime reduction."}
+          ${
+            b.s === "good"
+              ? "Great job! Production is on track."
+              : b.s === "warning"
+              ? "You're close to target. Reduce minor stoppages."
+              : "Production is lagging. Focus on downtime reduction."
+          }
         </div>
       </div>
 
-      <button class="cta">View Detailed Analysis</button>
+      <button class="cta" id="analysisBtn">View Detailed Analysis</button>
     </div>
   `;
+
+  // 🔑 THIS IS THE ONLY NEW LOGIC
+  const analysisBtn = document.getElementById("analysisBtn");
+  if (analysisBtn) {
+    analysisBtn.onclick = () => openAnalysis({
+      timeBlock: BLOCKS[i],
+      status: b.s,
+      actual: b.actual,
+      expected: b.expected,
+      performance: b.perf,
+      downtime: b.downtime,
+      availability: b.avail,
+      quality: b.qual,
+      oee: b.oee
+    });
+  }
 }
 
-function closeDetails(){
-  document.getElementById("details").classList.remove("active");
-  document.querySelectorAll(".block").forEach(b=>b.classList.remove("active"));
-  activeIndex=null;
-}
 
 /* ================= SUMMARY ================= */
 function renderSummary(blocks){
@@ -551,6 +704,52 @@ datePicker.onchange = e => {
   if(!JWT) return alert("JWT missing");
   await loadTimeline(new Date());
 })();
+
+
+  */========Open Detail POPup Window=========*/
+  function openAnalysis(block){
+  const modal = document.getElementById("analysisModal");
+  modal.style.display = "flex";
+
+  document.getElementById("modalTitle").textContent = "Detailed Analysis";
+  document.getElementById("modalTime").textContent = `Time Block: ${block.label}`;
+
+  document.getElementById("mPerformance").textContent = `${block.perf.toFixed(1)}%`;
+  document.getElementById("mActual").textContent = `${Math.round(block.actual)} mtr`;
+  document.getElementById("mDowntime").textContent = `${block.downtime} min`;
+
+  const status = block.zone;
+  const statusEl = document.getElementById("modalStatus");
+  statusEl.textContent = `Status: ${status}`;
+
+  statusEl.style.background =
+    status === "Good" ? "#e8f8ef" :
+    status === "Warning" ? "#fff4e5" : "#fdecea";
+
+  statusEl.style.color =
+    status === "Good" ? "#1b7f4a" :
+    status === "Warning" ? "#b26a00" : "#b71c1c";
+
+  const reason = document.getElementById("modalReason");
+  reason.textContent =
+    status === "Good"
+      ? "Production is on track. Keep the consistency."
+      : status === "Warning"
+        ? "You are close to target. Minor improvements required."
+        : "Production is lagging. Immediate attention required.";
+
+  const findings = document.getElementById("modalFindings");
+  findings.innerHTML = `
+    <li>Expected production: ${Math.round(block.expected)} mtr</li>
+    <li>Actual production: ${Math.round(block.actual)} mtr</li>
+    <li>Performance: ${block.perf.toFixed(1)}%</li>
+    <li>Downtime: ${block.downtime} minutes</li>
+  `;
+}
+function closeAnalysis(){
+  document.getElementById("analysisModal").style.display = "none";
+}
+
 </script>
 </body>
 </html>
