@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+/* ===== BASE ===== */
 body{
   margin:0;
   font-family:"Segoe UI",Roboto,sans-serif;
@@ -20,84 +21,106 @@ body{
   box-shadow:0 16px 40px rgba(0,0,0,.1);
 }
 
-/* Header */
+/* ===== HEADER ===== */
 .header{display:flex;justify-content:space-between;align-items:center;}
 .brand{font-size:22px;font-weight:700;color:#2563eb;}
 .subtitle{font-size:14px;color:#64748b}
 
-/* Controls */
+/* ===== CONTROLS ===== */
 .controls{display:flex;gap:10px;margin-top:16px}
-.btn{padding:8px 18px;border-radius:12px;border:1px solid #c7d2fe;background:#f8fafc;font-weight:600}
+.btn{
+  padding:8px 18px;border-radius:12px;
+  border:1px solid #c7d2fe;background:#f8fafc;font-weight:600
+}
 .btn.active{background:#2563eb;color:#fff}
 
-/* Timeline line */
+/* ===== TIMELINE LINE ===== */
 .timeline-wrapper{position:relative;margin-top:28px}
-.timeline-line{position:absolute;top:14px;left:0;right:0;height:4px;background:#e5e7eb;border-radius:2px}
-.timeline-dots{display:grid;grid-template-columns:repeat(6,1fr)}
-.dot{width:14px;height:14px;border-radius:50%;margin:auto;z-index:2}
+.timeline-line{
+  position:absolute;top:14px;left:0;right:0;
+  height:4px;background:#e5e7eb;border-radius:2px
+}
+.timeline-dots{
+  display:grid;grid-template-columns:repeat(6,1fr)
+}
+.dot{
+  width:14px;height:14px;border-radius:50%;
+  margin:auto;z-index:2
+}
 .dot.good{background:#22c55e}
 .dot.warning{background:#f59e0b}
 .dot.critical{background:#ef4444}
 
-/* Blocks */
-.timeline{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:28px}
+/* ===== BLOCKS ===== */
+.timeline{
+  display:grid;grid-template-columns:repeat(6,1fr);
+  gap:14px;margin-top:28px
+}
 .block{
-  border-radius:16px;padding:14px;border:2px solid #e5e7eb;
-  background:#f9fafb;transition:.2s
+  border-radius:16px;padding:14px;
+  border:2px solid #e5e7eb;
+  background:#f9fafb;
+  cursor:pointer;transition:.2s
 }
 .block.good{border-color:#22c55e;background:#f0fdf4}
 .block.warning{border-color:#f59e0b;background:#fffbeb}
 .block.critical{border-color:#ef4444;background:#fef2f2}
 
+.block.selected{
+  box-shadow:0 0 0 3px rgba(37,99,235,.25)
+}
+
 .block-header{
-  display:flex;justify-content:space-between;align-items:center;
+  display:flex;justify-content:space-between;align-items:center
 }
 .time{font-weight:700}
 .status-pill{
-  font-size:12px;padding:4px 10px;border-radius:999px;
-  font-weight:700;color:#fff
+  font-size:12px;padding:4px 10px;
+  border-radius:999px;font-weight:700;color:#fff
 }
 .good .status-pill{background:#22c55e}
 .warning .status-pill{background:#f59e0b}
 .critical .status-pill{background:#ef4444}
 
-.chevron{
-  cursor:pointer;font-size:14px;transition:.2s
-}
-.chevron.open{transform:rotate(180deg)}
+.chevron{font-size:14px;transition:.2s}
+.block.selected .chevron{transform:rotate(180deg)}
 
 .metric{margin-top:8px;font-size:13px;color:#334155}
 .metric strong{font-size:18px;color:#0f172a}
 
-/* Expanded area */
-.expand{
-  display:none;margin-top:12px;padding:14px;border-radius:14px;
-  background:#fff;border:1px solid #e5e7eb
+/* ===== DETAIL PANEL ===== */
+.detail{
+  display:none;margin-top:26px;
+  border-radius:18px;padding:18px;
+  border:2px solid #e5e7eb
 }
-.expand.active{display:block}
+.detail.good{border-color:#22c55e;background:#f0fdf4}
+.detail.warning{border-color:#f59e0b;background:#fffbeb}
+.detail.critical{border-color:#ef4444;background:#fef2f2}
 
-.expand-header{
-  display:flex;justify-content:space-between;align-items:center;
-  font-weight:600
+.detail-header{
+  display:flex;justify-content:space-between;align-items:center
 }
-.close-btn{cursor:pointer;font-weight:700}
+.detail-title{font-weight:700}
+.close-btn{cursor:pointer;font-size:18px;font-weight:700}
 
-.expand-grid{
-  margin-top:10px;
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:10px
+.detail-grid{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:14px;margin-top:14px
 }
 .box{
-  padding:12px;border-radius:12px;
-  border:1px solid #e5e7eb
+  background:#fff;border-radius:14px;
+  padding:14px;border:1px solid #e5e7eb
 }
-.good-box{background:#f0fdf4;border-color:#22c55e}
-.warn-box{background:#fffbeb;border-color:#f59e0b}
-.crit-box{background:#fef2f2;border-color:#ef4444}
-
 .box h4{margin:0;font-size:13px;color:#64748b}
 .box .val{margin-top:6px;font-size:18px;font-weight:700}
+
+.cta{
+  margin-top:14px;
+  background:#2563eb;color:#fff;
+  padding:10px 18px;border-radius:12px;
+  font-weight:600;display:inline-block
+}
 </style>
 </head>
 
@@ -125,6 +148,9 @@ body{
 
 <div id="timeline" class="timeline"></div>
 
+<!-- DETAIL PANEL -->
+<div id="detail" class="detail"></div>
+
 </div>
 
 <script>
@@ -140,9 +166,7 @@ const getHourIST=ts=>new Date(ts+19800000).getUTCHours();
 const blockIndex=ts=>Math.floor(getHourIST(ts)/4);
 
 async function fetchData(){
- const d=new Date();
- const s=new Date(d.toDateString()).getTime();
- const e=s+86400000-1;
+ const d=new Date(),s=new Date(d.toDateString()).getTime(),e=s+86400000-1;
  const url=`${API_BASE}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${s}&endTs=${e}&agg=NONE&limit=5000`;
  const r=await fetch(url,{headers:{"X-Authorization":"Bearer "+JWT}});
  return r.json();
@@ -178,71 +202,76 @@ function aggregate(rows){
  });
 }
 
+let activeIndex=null;
+
 function render(blocks){
  const tl=document.getElementById("timeline");
  const dots=document.getElementById("dots");
- tl.innerHTML=""; dots.innerHTML="";
+ const detail=document.getElementById("detail");
+ tl.innerHTML="";dots.innerHTML="";
+
  blocks.forEach((b,i)=>{
   dots.innerHTML+=`<div class="dot ${b.s}"></div>`;
-  const diff=b.a-b.e;
   const el=document.createElement("div");
   el.className=`block ${b.s}`;
   el.innerHTML=`
    <div class="block-header">
-    <div class="time">${BLOCKS[i]}</div>
-    <div style="display:flex;gap:6px;align-items:center">
-      <div class="status-pill">${b.s.toUpperCase()}</div>
-      <div class="chevron">▼</div>
-    </div>
+     <div class="time">${BLOCKS[i]}</div>
+     <div style="display:flex;gap:6px;align-items:center">
+       <div class="status-pill">${b.s.toUpperCase()}</div>
+       <div class="chevron">▼</div>
+     </div>
    </div>
    <div class="metric">Performance<br><strong>${b.perf.toFixed(1)}%</strong></div>
    <div class="metric">${b.a} / ${b.e}</div>
    <div class="metric">Target ${b.e} | Downtime ${b.d} min</div>
-
-   <div class="expand">
-    <div class="expand-header">
-      <div>Time Block: ${BLOCKS[i]}</div>
-      <div class="close-btn">✕</div>
-    </div>
-    <div class="expand-grid">
-      <div class="box ${b.s}-box">
-        <h4>Production Status</h4>
-        <div class="val">${diff>=0?"Ahead":"Behind"} ${Math.abs(diff)} pcs</div>
-      </div>
-      <div class="box ${b.s}-box">
-        <h4>Downtime</h4>
-        <div class="val">${b.d} minutes</div>
-      </div>
-      <div class="box ${b.s}-box">
-        <h4>Quick Insight</h4>
-        <div class="val">${
-          b.s==="good"?"Great job! Production on track.":
-          b.s==="warning"?"Reduce minor stoppages to improve.":
-          "High downtime detected. Immediate action required."
-        }</div>
-      </div>
-    </div>
-   </div>
   `;
 
-  const chevron=el.querySelector(".chevron");
-  const expand=el.querySelector(".expand");
-  const close=el.querySelector(".close-btn");
-
-  function collapseAll(){
-    document.querySelectorAll(".expand").forEach(e=>e.classList.remove("active"));
-    document.querySelectorAll(".chevron").forEach(c=>c.classList.remove("open"));
-  }
-
-  chevron.onclick=()=>{
-    const open=expand.classList.contains("active");
-    collapseAll();
-    if(!open){
-      expand.classList.add("active");
-      chevron.classList.add("open");
+  el.onclick=()=>{
+    if(activeIndex===i){
+      detail.style.display="none";
+      document.querySelectorAll(".block").forEach(x=>x.classList.remove("selected"));
+      activeIndex=null;
+      return;
     }
+    activeIndex=i;
+    document.querySelectorAll(".block").forEach(x=>x.classList.remove("selected"));
+    el.classList.add("selected");
+
+    const diff=b.a-b.e;
+    detail.className=`detail ${b.s}`;
+    detail.style.display="block";
+    detail.innerHTML=`
+      <div class="detail-header">
+        <div class="detail-title">Time Block: ${BLOCKS[i]} &nbsp;|&nbsp; Status: ${b.s.toUpperCase()}</div>
+        <div class="close-btn">✕</div>
+      </div>
+      <div class="detail-grid">
+        <div class="box">
+          <h4>Production Status</h4>
+          <div class="val">${diff>=0?"Ahead":"Behind"} ${Math.abs(diff)} pcs</div>
+        </div>
+        <div class="box">
+          <h4>Downtime Status</h4>
+          <div class="val">${b.d} minutes</div>
+        </div>
+        <div class="box">
+          <h4>Quick Insight</h4>
+          <div class="val">${
+            b.s==="good"?"Great job! Production is on track.":
+            b.s==="warning"?"You're close to target. Reduce minor stoppages.":
+            "High downtime detected. Immediate action required."
+          }</div>
+        </div>
+      </div>
+      <div class="cta">View Detailed Analysis</div>
+    `;
+    detail.querySelector(".close-btn").onclick=()=>{
+      detail.style.display="none";
+      el.classList.remove("selected");
+      activeIndex=null;
+    };
   };
-  close.onclick=collapseAll;
 
   tl.appendChild(el);
  });
