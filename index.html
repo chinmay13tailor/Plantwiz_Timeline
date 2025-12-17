@@ -313,7 +313,73 @@ body{
 <div id="details" class="details"></div>
 <div id="summary" class="summary"></div>
 
+  
 </div>
+
+  <!-- ================= DETAILED ANALYSIS MODAL ================= -->
+<div id="analysisModal" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+">
+  <div style="
+    width:680px;
+    max-height:90vh;
+    background:#fff;
+    border-radius:16px;
+    overflow:auto;
+    box-shadow:0 20px 50px rgba(0,0,0,.3);
+  ">
+
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:16px 20px;
+      border-bottom:1px solid #e5e7eb;
+    ">
+      <div>
+        <div style="font-weight:700">Detailed Analysis</div>
+        <div id="modalTime" style="font-size:13px;color:#64748b"></div>
+      </div>
+      <button onclick="closeAnalysis()" style="
+        border:none;
+        background:none;
+        font-size:22px;
+        cursor:pointer;
+      ">×</button>
+    </div>
+
+    <div id="modalStatus" style="
+      margin:14px 20px;
+      padding:6px 12px;
+      border-radius:20px;
+      font-weight:600;
+      width:fit-content;
+    ">Status</div>
+
+    <div style="padding:16px 20px">
+      <h4>Key Metrics</h4>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div><strong id="mPerformance">0%</strong><br>Performance</div>
+        <div><strong id="mActual">0</strong><br>Actual</div>
+        <div><strong id="mDowntime">0</strong><br>Downtime</div>
+      </div>
+    </div>
+
+    <div style="padding:0 20px 20px">
+      <h4>Insight</h4>
+      <p id="modalReason"></p>
+      <ul id="modalFindings"></ul>
+    </div>
+
+  </div>
+</div>
+
 
 <script>
 /* ================= CONFIG ================= */
@@ -447,7 +513,24 @@ function toggleDetails(blocks,i){
       <button class="cta">View Detailed Analysis</button>
     </div>
   `;
+const viewBtn = d.querySelector(".cta");
+if (viewBtn) {
+  viewBtn.onclick = () => openAnalysis({
+    label: BLOCKS[i],
+    actual: b.actual,
+    expected: b.expected,
+    perf: b.perf,
+    downtime: b.downtime,
+    zone: b.s === "good"
+      ? "Good"
+      : b.s === "warning"
+        ? "Warning"
+        : "Critical"
+  });
 }
+/*
+}
+  
 
 function closeDetails(){
   document.getElementById("details").classList.remove("active");
@@ -506,6 +589,66 @@ async function loadTimeline(date){
     hideLoading();                  // 🔑 ADD
   }
 }
+
+/* ================= DETAILED ANALYSIS MODAL ================= */
+
+function openAnalysis(block){
+  const modal = document.getElementById("analysisModal");
+  modal.style.display = "flex";
+
+  // Header
+  document.getElementById("modalTime").textContent =
+    `Time Block: ${block.label}`;
+
+  // Metrics
+  document.getElementById("mPerformance").textContent =
+    `${block.perf.toFixed(1)}%`;
+
+  document.getElementById("mActual").textContent =
+    `${Math.round(block.actual)} mtr`;
+
+  document.getElementById("mDowntime").textContent =
+    `${block.downtime} min`;
+
+  // Status pill
+  const statusEl = document.getElementById("modalStatus");
+  const status = block.zone;
+
+  statusEl.textContent = `Status: ${status}`;
+
+  statusEl.style.background =
+    status === "Good" ? "#e8f8ef" :
+    status === "Warning" ? "#fff4e5" :
+    "#fdecea";
+
+  statusEl.style.color =
+    status === "Good" ? "#1b7f4a" :
+    status === "Warning" ? "#b26a00" :
+    "#b71c1c";
+
+  // Insight
+  const reason = document.getElementById("modalReason");
+  reason.textContent =
+    status === "Good"
+      ? "Production is on track. Keep the consistency."
+      : status === "Warning"
+        ? "You are close to target. Minor improvements required."
+        : "Production is lagging. Immediate attention required.";
+
+  // Findings
+  const findings = document.getElementById("modalFindings");
+  findings.innerHTML = `
+    <li>Expected production: ${Math.round(block.expected)} mtr</li>
+    <li>Actual production: ${Math.round(block.actual)} mtr</li>
+    <li>Performance: ${block.perf.toFixed(1)}%</li>
+    <li>Downtime: ${block.downtime} minutes</li>
+  `;
+}
+
+function closeAnalysis(){
+  document.getElementById("analysisModal").style.display = "none";
+}
+  
 
 
 /* ================= BUTTONS ================= */
