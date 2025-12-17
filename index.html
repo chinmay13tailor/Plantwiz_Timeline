@@ -29,9 +29,6 @@ body{
   align-items:center;
 }
 .brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
   font-size:22px;
   font-weight:700;
   color:#2563eb;
@@ -98,7 +95,6 @@ body{
   height:12px;
   border-radius:50%;
   margin:auto;
-  z-index:2;
 }
 .dot.good{background:#22c55e}
 .dot.warning{background:#f59e0b}
@@ -110,7 +106,6 @@ body{
   top:-10px;
   transform:translateX(-50%);
   z-index:5;
-  pointer-events:none;
 }
 .pin-icon{
   width:20px;
@@ -145,7 +140,6 @@ body{
   border:2px solid #e5e7eb;
   background:#f9fafb;
   cursor:pointer;
-  transition:.25s;
 }
 .block.good{border-color:#22c55e;background:#f0fdf4}
 .block.warning{border-color:#f59e0b;background:#fffbeb}
@@ -155,7 +149,6 @@ body{
   justify-content:space-between;
   align-items:center;
 }
-.time{font-weight:700}
 .status{
   font-size:12px;
   padding:4px 10px;
@@ -165,20 +158,14 @@ body{
 .good .status{background:#22c55e}
 .warning .status{background:#f59e0b}
 .critical .status{background:#ef4444}
-.metric{
-  margin-top:10px;
-  font-size:14px;
-}
-.metric strong{
-  font-size:18px;
-}
+.metric{margin-top:8px}
 
-/* ================= DROPDOWN DETAILS ================= */
+/* ================= DETAILS ================= */
 .details{
   overflow:hidden;
   max-height:0;
-  transition:max-height .5s ease,opacity .4s ease;
   opacity:0;
+  transition:max-height .5s ease,opacity .4s ease;
 }
 .details.active{
   max-height:500px;
@@ -196,11 +183,6 @@ body{
 .details-top{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-}
-.close{
-  cursor:pointer;
-  font-size:18px;
 }
 .details-grid{
   display:grid;
@@ -214,18 +196,8 @@ body{
   border-radius:12px;
   border:1px solid #e5e7eb;
 }
-.card h4{
-  font-size:13px;
-  margin:0 0 6px;
-}
-.card .val{
-  font-size:18px;
-  font-weight:700;
-}
 .insight{
   margin-top:14px;
-  padding:14px;
-  border-radius:12px;
   font-weight:600;
 }
 
@@ -239,12 +211,9 @@ body{
 .summary-card{
   padding:16px;
   border-radius:14px;
-  border:1px solid #e5e7eb;
   background:#f8fafc;
+  border:1px solid #e5e7eb;
   text-align:center;
-}
-.summary-card strong{
-  font-size:20px;
 }
 </style>
 </head>
@@ -275,8 +244,7 @@ body{
 
 <div id="timeline" class="timeline"></div>
 <div id="details" class="details"></div>
-
-<div class="summary" id="summary"></div>
+<div id="summary" class="summary"></div>
 
 </div>
 
@@ -294,8 +262,6 @@ const JWT=new URLSearchParams(location.search).get("token");
 
 /* ================= HELPERS ================= */
 const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:0;
-const n=v=>Number(v)||0;
-const blockIdx=ts=>Math.floor(new Date(ts).getHours()/4);
 
 /* ================= FETCH ================= */
 async function fetchData(){
@@ -307,26 +273,41 @@ async function fetchData(){
   return r.json();
 }
 
+/* ================= MERGE (CRITICAL FIX) ================= */
+function mergeTelemetry(raw){
+  const map={};
+  Object.entries(raw).forEach(([key,arr])=>{
+    arr.forEach(p=>{
+      if(!map[p.ts]) map[p.ts]={ts:p.ts};
+      map[p.ts][key]=Number(p.value);
+    });
+  });
+  return Object.values(map);
+}
+
 /* ================= AGGREGATE ================= */
-function aggregate(raw){
+function aggregate(rows){
   const blocks=[...Array(6)].map(()=>({
     actual:0,expected:0,energy:0,
     runtime:0,downtime:0,idle:0,
     p:[],a:[],q:[],o:[]
   }));
-  Object.values(raw).flat().forEach(p=>{
-    const i=blockIdx(p.ts),b=blocks[i];
-    b.actual+=n(p.Meter_Run_Per_Min);
-    b.expected+=n(p.deltaexpectedproduction);
-    b.energy+=n(p.Consumption_Per_Min);
-    b.runtime+=n(p.Runtime);
-    b.downtime+=n(p.Downtime);
-    b.idle+=n(p.Idletime);
+
+  rows.forEach(p=>{
+    const i=Math.floor(new Date(p.ts).getHours()/4);
+    const b=blocks[i];
+    b.actual+=p.Meter_Run_Per_Min||0;
+    b.expected+=p.deltaexpectedproduction||0;
+    b.energy+=p.Consumption_Per_Min||0;
+    b.runtime+=p.Runtime||0;
+    b.downtime+=p.Downtime||0;
+    b.idle+=p.Idletime||0;
     if(p.deltaperformance!=null)b.p.push(p.deltaperformance);
     if(p.deltaavailability!=null)b.a.push(p.deltaavailability);
     if(p.deltaquality!=null)b.q.push(p.deltaquality);
     if(p.deltaoee!=null)b.o.push(p.deltaoee);
   });
+
   return blocks.map(b=>{
     const perfPct=b.expected?(b.actual/b.expected)*100:0;
     let s="good";
@@ -334,11 +315,8 @@ function aggregate(raw){
     else if(perfPct<90)s="warning";
     return{
       ...b,
-      perfPct,
       s,
       perf:avg(b.p),
-      avail:avg(b.a),
-      qual:avg(b.q),
       oee:avg(b.o)
     };
   });
@@ -355,12 +333,12 @@ function render(blocks){
     el.className=`block ${b.s}`;
     el.innerHTML=`
       <div class="block-header">
-        <div class="time">${BLOCKS[i]}</div>
+        <strong>${BLOCKS[i]}</strong>
         <div class="status">${b.s.toUpperCase()}</div>
       </div>
-      <div class="metric">Performance<br><strong>${b.perf.toFixed(1)}%</strong></div>
+      <div class="metric">Performance ${b.perf.toFixed(1)}%</div>
       <div class="metric">${Math.round(b.actual)} / ${Math.round(b.expected)} mtr</div>
-      <div class="metric">Downtime<br><strong>${b.downtime} min</strong></div>`;
+      <div class="metric">Downtime ${b.downtime} min</div>`;
     el.onclick=()=>toggleDetails(b,i);
     tl.appendChild(el);
   });
@@ -369,32 +347,27 @@ function render(blocks){
 /* ================= DETAILS ================= */
 function toggleDetails(b,i){
   const d=document.getElementById("details");
-  if(d.dataset.i==i && d.classList.contains("active")){
-    d.classList.remove("active");
-    return;
-  }
-  d.dataset.i=i;
   d.className=`details active ${b.s}`;
   d.innerHTML=`
-  <div class="details-box ${b.s}">
-    <div class="details-top">
-      <strong>Time Block: ${BLOCKS[i]}</strong>
-      <span class="close" onclick="document.getElementById('details').classList.remove('active')">×</span>
-    </div>
-    <div class="details-grid">
-      <div class="card"><h4>Actual</h4><div class="val">${Math.round(b.actual)} mtr</div></div>
-      <div class="card"><h4>Expected</h4><div class="val">${Math.round(b.expected)} mtr</div></div>
-      <div class="card"><h4>Energy</h4><div class="val">${b.energy.toFixed(1)}</div></div>
-      <div class="card"><h4>Runtime</h4><div class="val">${b.runtime} min</div></div>
-      <div class="card"><h4>Downtime</h4><div class="val">${b.downtime} min</div></div>
-      <div class="card"><h4>Idle</h4><div class="val">${b.idle} min</div></div>
-    </div>
-    <div class="insight">
-      ${b.s==="good"?"Great job! Production is on track.":
-        b.s==="warning"?"You're close to target. Reduce minor stoppages.":
-        "Production is lagging. Focus on downtime reduction."}
-    </div>
-  </div>`;
+    <div class="details-box ${b.s}">
+      <div class="details-top">
+        <strong>Time Block: ${BLOCKS[i]}</strong>
+        <span style="cursor:pointer" onclick="document.getElementById('details').classList.remove('active')">×</span>
+      </div>
+      <div class="details-grid">
+        <div class="card">Actual<br><strong>${Math.round(b.actual)} mtr</strong></div>
+        <div class="card">Expected<br><strong>${Math.round(b.expected)} mtr</strong></div>
+        <div class="card">Energy<br><strong>${b.energy.toFixed(1)}</strong></div>
+        <div class="card">Runtime<br><strong>${b.runtime} min</strong></div>
+        <div class="card">Downtime<br><strong>${b.downtime} min</strong></div>
+        <div class="card">Idle<br><strong>${b.idle} min</strong></div>
+      </div>
+      <div class="insight">
+        ${b.s==="good"?"Great job! Production is on track.":
+          b.s==="warning"?"You're close to target. Reduce minor stoppages.":
+          "Production is lagging. Focus on downtime reduction."}
+      </div>
+    </div>`;
 }
 
 /* ================= SUMMARY ================= */
@@ -405,13 +378,13 @@ function renderSummary(blocks){
   const down=blocks.reduce((a,b)=>a+b.downtime,0);
   const oee=avg(blocks.map(b=>b.oee));
   s.innerHTML=`
-    <div class="summary-card"><div>Total Expected</div><strong>${Math.round(exp)} mtr</strong></div>
-    <div class="summary-card"><div>Total Actual</div><strong>${Math.round(act)} mtr</strong></div>
-    <div class="summary-card"><div>Total Downtime</div><strong>${down} min</strong></div>
-    <div class="summary-card"><div>Overall Status</div><strong>${oee.toFixed(1)}%</strong></div>`;
+    <div class="summary-card">Total Expected<br><strong>${Math.round(exp)} mtr</strong></div>
+    <div class="summary-card">Total Actual<br><strong>${Math.round(act)} mtr</strong></div>
+    <div class="summary-card">Total Downtime<br><strong>${down} min</strong></div>
+    <div class="summary-card">Overall Status<br><strong>${oee.toFixed(1)}%</strong></div>`;
 }
 
-/* ================= TIME INDICATOR ================= */
+/* ================= TIME PIN ================= */
 function updateTimeIndicator(blocks){
   const pin=document.getElementById("time-pin");
   const icon=pin.firstElementChild;
@@ -429,7 +402,8 @@ function updateTimeIndicator(blocks){
 (async()=>{
   if(!JWT) return alert("JWT missing");
   const raw=await fetchData();
-  const blocks=aggregate(raw);
+  const rows=mergeTelemetry(raw);   // ✅ FIX
+  const blocks=aggregate(rows);
   render(blocks);
   renderSummary(blocks);
   updateTimeIndicator(blocks);
