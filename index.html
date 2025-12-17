@@ -1,243 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>Plantwiz | Production Timeline</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
 /* ================= BASE ================= */
 body{
   margin:0;
   font-family:"Segoe UI",Roboto,sans-serif;
-  background:#eef2f7;
+  background:#f4f7fb;
+  color:#1f2937;
 }
 .container{
   max-width:1400px;
-  margin:24px auto;
+  margin:20px auto;
+  padding:24px;
   background:#fff;
-  border-radius:20px;
-  padding:22px;
-  box-shadow:0 16px 40px rgba(0,0,0,.1);
+  border-radius:18px;
+  box-shadow:0 12px 40px rgba(0,0,0,.08);
 }
 
 /* ================= HEADER ================= */
-.header{display:flex;justify-content:space-between;align-items:center;}
-.brand{font-size:22px;font-weight:700;color:#2563eb;}
-.subtitle{font-size:14px;color:#64748b}
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:22px;
+  font-weight:700;
+  color:#2563eb;
+}
+.subtitle{
+  font-size:14px;
+  color:#64748b;
+}
 
 /* ================= CONTROLS ================= */
-.controls{display:flex;gap:10px;margin-top:16px}
-.btn{
-  padding:8px 18px;border-radius:12px;
-  border:1px solid #c7d2fe;background:#f8fafc;
-  font-weight:600;cursor:pointer;
-  transition:all .25s ease;
+.controls{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
 }
-.btn.active{background:#2563eb;color:#fff}
+.btn{
+  padding:8px 16px;
+  border-radius:10px;
+  border:1px solid #c7d2fe;
+  background:#f8fafc;
+  font-weight:600;
+  cursor:pointer;
+}
+.btn.active{
+  background:#2563eb;
+  color:#fff;
+}
 
-/* ================= TIMELINE LINE ================= */
-.timeline-wrapper{position:relative;margin-top:28px}
+/* ================= TIMELINE ================= */
+.timeline-wrapper{
+  position:relative;
+  margin:26px 0 16px;
+}
 .timeline-line{
-  position:absolute;top:14px;left:0;right:0;
-  height:4px;background:#e5e7eb;border-radius:2px
+  height:4px;
+  background:#e5e7eb;
+  border-radius:2px;
+}
+.timeline-progress{
+  position:absolute;
+  top:0;
+  left:0;
+  height:4px;
+  width:0%;
+  border-radius:2px;
+  background:linear-gradient(90deg,#3b82f6,#60a5fa,#3b82f6);
+  background-size:200% 100%;
+  animation:flow 2.5s linear infinite;
+}
+@keyframes flow{
+  0%{background-position:0% 50%}
+  100%{background-position:200% 50%}
 }
 .timeline-dots{
-  display:grid;grid-template-columns:repeat(6,1fr)
+  position:absolute;
+  top:-6px;
+  left:0;
+  right:0;
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
 }
 .dot{
-  width:14px;height:14px;border-radius:50%;
-  margin:auto;z-index:2
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  margin:auto;
+  z-index:2;
 }
 .dot.good{background:#22c55e}
 .dot.warning{background:#f59e0b}
 .dot.critical{background:#ef4444}
 
+/* ================= CURRENT TIME PIN ================= */
+.time-pin{
+  position:absolute;
+  top:-10px;
+  transform:translateX(-50%);
+  z-index:5;
+  pointer-events:none;
+}
+.pin-icon{
+  width:20px;
+  height:20px;
+  border-radius:50% 50% 50% 0;
+  transform:rotate(-45deg);
+  position:relative;
+}
+.pin-icon::after{
+  content:"";
+  width:8px;
+  height:8px;
+  background:#fff;
+  border-radius:50%;
+  position:absolute;
+  top:6px;
+  left:6px;
+}
+.pin-good{background:#22c55e}
+.pin-warning{background:#f59e0b}
+.pin-critical{background:#ef4444}
+
 /* ================= BLOCKS ================= */
 .timeline{
   display:grid;
   grid-template-columns:repeat(6,1fr);
-  gap:14px;margin-top:28px
+  gap:16px;
 }
 .block{
-  border-radius:16px;
+  border-radius:14px;
   padding:14px;
   border:2px solid #e5e7eb;
   background:#f9fafb;
   cursor:pointer;
-
-  transition:
-    transform .25s cubic-bezier(0.22,1,0.36,1),
-    box-shadow .25s ease,
-    border-color .25s ease;
-}
-.block:hover{
-  transform:translateY(-2px);
+  transition:.25s;
 }
 .block.good{border-color:#22c55e;background:#f0fdf4}
 .block.warning{border-color:#f59e0b;background:#fffbeb}
 .block.critical{border-color:#ef4444;background:#fef2f2}
-
-.block.selected{
-  box-shadow:0 10px 26px rgba(37,99,235,.18);
-  transform:translateY(-3px);
-}
-
-/* ================= CARD HEADER ================= */
 .block-header{
   display:flex;
   justify-content:space-between;
-  align-items:center
+  align-items:center;
 }
 .time{font-weight:700}
-.status-pill{
+.status{
   font-size:12px;
   padding:4px 10px;
-  border-radius:999px;
-  font-weight:700;
-  color:#fff
+  border-radius:20px;
+  color:#fff;
 }
-.good .status-pill{background:#22c55e}
-.warning .status-pill{background:#f59e0b}
-.critical .status-pill{background:#ef4444}
-
-.chevron{
-  font-size:14px;
-  transition:transform .35s cubic-bezier(0.22,1,0.36,1);
-}
-.block.selected .chevron{
-  transform:rotate(180deg);
-}
-
-/* ================= METRICS ================= */
+.good .status{background:#22c55e}
+.warning .status{background:#f59e0b}
+.critical .status{background:#ef4444}
 .metric{
-  margin-top:8px;
-  font-size:13px;
-  color:#334155
+  margin-top:10px;
+  font-size:14px;
 }
 .metric strong{
   font-size:18px;
-  color:#0f172a
 }
 
-/* ================= DETAIL PANEL (ULTRA SMOOTH) ================= */
-.detail{
-  margin-top:26px;
-  border-radius:18px;
-  padding:0 18px;
-  border:2px solid #e5e7eb;
+/* ================= DROPDOWN DETAILS ================= */
+.details{
   overflow:hidden;
-
   max-height:0;
+  transition:max-height .5s ease,opacity .4s ease;
   opacity:0;
-  transform:translateY(-12px) scale(0.97);
-
-  transition:
-    max-height .6s cubic-bezier(0.4,0.0,0.2,1),
-    opacity .35s ease-out,
-    transform .45s cubic-bezier(0.22,1,0.36,1),
-    padding .35s ease;
 }
-
-.detail.show{
-  max-height:700px;
+.details.active{
+  max-height:500px;
   opacity:1;
-  padding:18px;
-  transform:translateY(0) scale(1);
 }
-
-.detail.good{border-color:#22c55e;background:#f0fdf4}
-.detail.warning{border-color:#f59e0b;background:#fffbeb}
-.detail.critical{border-color:#ef4444;background:#fef2f2}
-
-/* ================= DETAIL CONTENT ================= */
-.detail-header{
+.details-box{
+  margin-top:18px;
+  border-radius:16px;
+  padding:18px;
+  border:2px solid;
+}
+.details.good{border-color:#22c55e;background:#f0fdf4}
+.details.warning{border-color:#f59e0b;background:#fffbeb}
+.details.critical{border-color:#ef4444;background:#fef2f2}
+.details-top{
   display:flex;
   justify-content:space-between;
-  align-items:center
+  align-items:center;
 }
-.detail-title{font-weight:700}
-.close-btn{
+.close{
   cursor:pointer;
   font-size:18px;
-  font-weight:700
 }
-
-.detail-grid{
+.details-grid{
   display:grid;
-  grid-template-columns:1fr 1fr 1fr;
+  grid-template-columns:repeat(3,1fr);
   gap:14px;
-  margin-top:14px
+  margin-top:14px;
 }
-
-/* stagger animation */
-.detail-grid .box{
-  opacity:0;
-  transform:translateY(10px);
-  animation:fadeUp .45s ease forwards;
-}
-.detail-grid .box:nth-child(1){animation-delay:.05s}
-.detail-grid .box:nth-child(2){animation-delay:.12s}
-.detail-grid .box:nth-child(3){animation-delay:.18s}
-
-@keyframes fadeUp{
-  to{opacity:1;transform:translateY(0)}
-}
-
-.box{
+.card{
   background:#fff;
-  border-radius:14px;
-  padding:14px;
-  border:1px solid #e5e7eb
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
 }
-.box h4{
-  margin:0;
+.card h4{
   font-size:13px;
-  color:#64748b
+  margin:0 0 6px;
 }
-.box .val{
-  margin-top:6px;
+.card .val{
   font-size:18px;
-  font-weight:700
+  font-weight:700;
 }
-
-.cta{
-  margin-top:16px;
-  background:#2563eb;
-  color:#fff;
-  padding:10px 18px;
+.insight{
+  margin-top:14px;
+  padding:14px;
   border-radius:12px;
   font-weight:600;
-  display:inline-block
 }
 
 /* ================= SUMMARY ================= */
 .summary{
-  margin-top:26px;
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:14px;
+  gap:16px;
+  margin-top:20px;
 }
-.sum-card{
-  background:#fff;
-  border-radius:16px;
+.summary-card{
   padding:16px;
+  border-radius:14px;
   border:1px solid #e5e7eb;
+  background:#f8fafc;
   text-align:center;
 }
-.sum-card h4{
-  margin:0;
-  font-size:13px;
-  color:#64748b;
+.summary-card strong{
+  font-size:20px;
 }
-.sum-card .val{
-  margin-top:8px;
-  font-size:22px;
-  font-weight:800;
-}
-.sum-card.green{background:#f0fdf4;border-color:#22c55e}
-.sum-card.yellow{background:#fffbeb;border-color:#f59e0b}
-.sum-card.red{background:#fef2f2;border-color:#ef4444}
 </style>
 </head>
 
@@ -260,186 +268,172 @@ body{
 
 <div class="timeline-wrapper">
   <div class="timeline-line"></div>
+  <div id="timeline-progress" class="timeline-progress"></div>
+  <div id="time-pin" class="time-pin"><div class="pin-icon"></div></div>
   <div id="dots" class="timeline-dots"></div>
 </div>
 
 <div id="timeline" class="timeline"></div>
-<div id="detail" class="detail"></div>
-<div id="summary" class="summary"></div>
+<div id="details" class="details"></div>
+
+<div class="summary" id="summary"></div>
 
 </div>
 
 <script>
-const API_BASE="https://plantwiz.pimateck.in/api";
+/* ================= CONFIG ================= */
+const API="https://plantwiz.pimateck.in/api";
 const DEVICE_ID="81261350-b886-11f0-87ea-b9809c1a7a9e";
-const KEYS=["Meter_Run_Per_Min","deltaexpectedproduction","Downtime","deltaperformance","deltaoee"];
+const KEYS=[
+"Meter_Run_Per_Min","Consumption_Per_Min","deltaexpectedproduction",
+"Runtime","Downtime","Idletime",
+"deltaperformance","deltaavailability","deltaquality","deltaoee"
+];
 const BLOCKS=["00–04","04–08","08–12","12–16","16–20","20–24"];
 const JWT=new URLSearchParams(location.search).get("token");
 
-const num=v=>Number(v)||0;
+/* ================= HELPERS ================= */
 const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:0;
-const getHourIST=ts=>new Date(ts+19800000).getUTCHours();
-const blockIndex=ts=>Math.floor(getHourIST(ts)/4);
+const n=v=>Number(v)||0;
+const blockIdx=ts=>Math.floor(new Date(ts).getHours()/4);
 
+/* ================= FETCH ================= */
 async function fetchData(){
- const d=new Date(),s=new Date(d.toDateString()).getTime(),e=s+86400000-1;
- const url=`${API_BASE}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${s}&endTs=${e}&agg=NONE&limit=5000`;
- const r=await fetch(url,{headers:{"X-Authorization":"Bearer "+JWT}});
- return r.json();
+  const d=new Date();
+  const start=new Date(d.toDateString()).getTime();
+  const end=start+86400000-1;
+  const url=`${API}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${start}&endTs=${end}&agg=NONE&limit=5000`;
+  const r=await fetch(url,{headers:{ "X-Authorization":`Bearer ${JWT}` }});
+  return r.json();
 }
 
-function merge(obj){
- const m=new Map();
- Object.entries(obj).forEach(([k,a])=>{
-  (a||[]).forEach(p=>{
-   const r=m.get(p.ts)||{ts:p.ts};
-   r[k]=Number(p.value);
-   m.set(p.ts,r);
+/* ================= AGGREGATE ================= */
+function aggregate(raw){
+  const blocks=[...Array(6)].map(()=>({
+    actual:0,expected:0,energy:0,
+    runtime:0,downtime:0,idle:0,
+    p:[],a:[],q:[],o:[]
+  }));
+  Object.values(raw).flat().forEach(p=>{
+    const i=blockIdx(p.ts),b=blocks[i];
+    b.actual+=n(p.Meter_Run_Per_Min);
+    b.expected+=n(p.deltaexpectedproduction);
+    b.energy+=n(p.Consumption_Per_Min);
+    b.runtime+=n(p.Runtime);
+    b.downtime+=n(p.Downtime);
+    b.idle+=n(p.Idletime);
+    if(p.deltaperformance!=null)b.p.push(p.deltaperformance);
+    if(p.deltaavailability!=null)b.a.push(p.deltaavailability);
+    if(p.deltaquality!=null)b.q.push(p.deltaquality);
+    if(p.deltaoee!=null)b.o.push(p.deltaoee);
   });
- });
- return [...m.values()];
-}
-
-function aggregate(rows){
- const b=Array.from({length:6},()=>({a:0,e:0,d:0,p:[]}));
- rows.forEach(r=>{
-  const i=blockIndex(r.ts),x=b[i];
-  x.a+=num(r.Meter_Run_Per_Min);
-  x.e+=num(r.deltaexpectedproduction);
-  x.d+=num(r.Downtime);
-  if(r.deltaperformance!=null)x.p.push(r.deltaperformance);
- });
- return b.map(x=>{
-  const perf=avg(x.p);
-  let s="good";
-  if(x.d>60)s="critical";
-  else if(perf<90)s="warning";
-  return {...x,perf,s};
- });
-}
-
-function calculateTotals(rows){
- let te=0,ta=0,td=0,o=[];
- rows.forEach(r=>{
-  te+=num(r.deltaexpectedproduction);
-  ta+=num(r.Meter_Run_Per_Min);
-  td+=num(r.Downtime);
-  if(r.deltaoee!=null)o.push(r.deltaoee);
- });
- return{te,ta,td,oee:avg(o)};
-}
-
-let activeIndex=null;
-
-function render(blocks){
- const tl=document.getElementById("timeline");
- const dots=document.getElementById("dots");
- const detail=document.getElementById("detail");
- tl.innerHTML="";dots.innerHTML="";
-
- blocks.forEach((b,i)=>{
-  dots.innerHTML+=`<div class="dot ${b.s}"></div>`;
-  const el=document.createElement("div");
-  el.className=`block ${b.s}`;
-  el.innerHTML=`
-   <div class="block-header">
-     <div class="time">${BLOCKS[i]}</div>
-     <div style="display:flex;gap:6px;align-items:center">
-       <div class="status-pill">${b.s.toUpperCase()}</div>
-       <div class="chevron">▼</div>
-     </div>
-   </div>
-   <div class="metric">Performance<br><strong>${b.perf.toFixed(1)}%</strong></div>
-   <div class="metric">${Math.round(b.a)} / ${Math.round(b.e)} mtr</div>
-   <div class="metric">Target ${Math.round(b.e)} | Downtime ${b.d} min</div>
-  `;
-
-  el.onclick=()=>{
-    if(activeIndex===i){
-      detail.classList.remove("show");
-      el.classList.remove("selected");
-      activeIndex=null;
-      return;
-    }
-    activeIndex=i;
-    document.querySelectorAll(".block").forEach(x=>x.classList.remove("selected"));
-    el.classList.add("selected");
-
-    const diff=Math.round(b.a-b.e);
-    detail.className=`detail ${b.s} show`;
-    detail.innerHTML=`
-      <div class="detail-header">
-        <div class="detail-title">Time Block: ${BLOCKS[i]} | Status: ${b.s.toUpperCase()}</div>
-        <div class="close-btn">✕</div>
-      </div>
-      <div class="detail-grid">
-        <div class="box">
-          <h4>Production Status</h4>
-          <div class="val">${diff>=0?"Ahead":"Behind"} ${Math.abs(diff)} mtr</div>
-        </div>
-        <div class="box">
-          <h4>Downtime Status</h4>
-          <div class="val">${b.d} minutes</div>
-        </div>
-        <div class="box">
-          <h4>Quick Insight</h4>
-          <div class="val">${
-            b.s==="good"?"Great job! Production is on track.":
-            b.s==="warning"?"You're close to target. Reduce minor stoppages.":
-            "Production is lagging. Focus on reducing downtime."
-          }</div>
-        </div>
-      </div>
-      <div class="cta">View Detailed Analysis</div>
-    `;
-    detail.querySelector(".close-btn").onclick=()=>{
-      detail.classList.remove("show");
-      el.classList.remove("selected");
-      activeIndex=null;
+  return blocks.map(b=>{
+    const perfPct=b.expected?(b.actual/b.expected)*100:0;
+    let s="good";
+    if(b.downtime>60)s="critical";
+    else if(perfPct<90)s="warning";
+    return{
+      ...b,
+      perfPct,
+      s,
+      perf:avg(b.p),
+      avail:avg(b.a),
+      qual:avg(b.q),
+      oee:avg(b.o)
     };
-  };
-  tl.appendChild(el);
- });
+  });
 }
 
-function renderSummary(t){
- const s=document.getElementById("summary");
- let cls="green";
- if(t.oee<80)cls="red";
- else if(t.oee<90)cls="yellow";
-
- s.innerHTML=`
-  <div class="sum-card">
-    <h4>Total Expected</h4>
-    <div class="val">${Math.round(t.te)}</div>
-    <div class="subtitle">mtr</div>
-  </div>
-  <div class="sum-card">
-    <h4>Total Actual</h4>
-    <div class="val">${Math.round(t.ta)}</div>
-    <div class="subtitle">mtr</div>
-  </div>
-  <div class="sum-card yellow">
-    <h4>Total Downtime</h4>
-    <div class="val">${t.td}</div>
-    <div class="subtitle">minutes</div>
-  </div>
-  <div class="sum-card ${cls}">
-    <h4>Overall Status</h4>
-    <div class="val">${t.oee.toFixed(1)}%</div>
-    <div class="subtitle">efficiency</div>
-  </div>
- `;
+/* ================= RENDER ================= */
+function render(blocks){
+  const tl=document.getElementById("timeline");
+  const dots=document.getElementById("dots");
+  tl.innerHTML="";dots.innerHTML="";
+  blocks.forEach((b,i)=>{
+    dots.innerHTML+=`<div class="dot ${b.s}"></div>`;
+    const el=document.createElement("div");
+    el.className=`block ${b.s}`;
+    el.innerHTML=`
+      <div class="block-header">
+        <div class="time">${BLOCKS[i]}</div>
+        <div class="status">${b.s.toUpperCase()}</div>
+      </div>
+      <div class="metric">Performance<br><strong>${b.perf.toFixed(1)}%</strong></div>
+      <div class="metric">${Math.round(b.actual)} / ${Math.round(b.expected)} mtr</div>
+      <div class="metric">Downtime<br><strong>${b.downtime} min</strong></div>`;
+    el.onclick=()=>toggleDetails(b,i);
+    tl.appendChild(el);
+  });
 }
 
+/* ================= DETAILS ================= */
+function toggleDetails(b,i){
+  const d=document.getElementById("details");
+  if(d.dataset.i==i && d.classList.contains("active")){
+    d.classList.remove("active");
+    return;
+  }
+  d.dataset.i=i;
+  d.className=`details active ${b.s}`;
+  d.innerHTML=`
+  <div class="details-box ${b.s}">
+    <div class="details-top">
+      <strong>Time Block: ${BLOCKS[i]}</strong>
+      <span class="close" onclick="document.getElementById('details').classList.remove('active')">×</span>
+    </div>
+    <div class="details-grid">
+      <div class="card"><h4>Actual</h4><div class="val">${Math.round(b.actual)} mtr</div></div>
+      <div class="card"><h4>Expected</h4><div class="val">${Math.round(b.expected)} mtr</div></div>
+      <div class="card"><h4>Energy</h4><div class="val">${b.energy.toFixed(1)}</div></div>
+      <div class="card"><h4>Runtime</h4><div class="val">${b.runtime} min</div></div>
+      <div class="card"><h4>Downtime</h4><div class="val">${b.downtime} min</div></div>
+      <div class="card"><h4>Idle</h4><div class="val">${b.idle} min</div></div>
+    </div>
+    <div class="insight">
+      ${b.s==="good"?"Great job! Production is on track.":
+        b.s==="warning"?"You're close to target. Reduce minor stoppages.":
+        "Production is lagging. Focus on downtime reduction."}
+    </div>
+  </div>`;
+}
+
+/* ================= SUMMARY ================= */
+function renderSummary(blocks){
+  const s=document.getElementById("summary");
+  const exp=blocks.reduce((a,b)=>a+b.expected,0);
+  const act=blocks.reduce((a,b)=>a+b.actual,0);
+  const down=blocks.reduce((a,b)=>a+b.downtime,0);
+  const oee=avg(blocks.map(b=>b.oee));
+  s.innerHTML=`
+    <div class="summary-card"><div>Total Expected</div><strong>${Math.round(exp)} mtr</strong></div>
+    <div class="summary-card"><div>Total Actual</div><strong>${Math.round(act)} mtr</strong></div>
+    <div class="summary-card"><div>Total Downtime</div><strong>${down} min</strong></div>
+    <div class="summary-card"><div>Overall Status</div><strong>${oee.toFixed(1)}%</strong></div>`;
+}
+
+/* ================= TIME INDICATOR ================= */
+function updateTimeIndicator(blocks){
+  const pin=document.getElementById("time-pin");
+  const icon=pin.firstElementChild;
+  const prog=document.getElementById("timeline-progress");
+  const now=new Date(Date.now()+19800000);
+  const m=now.getUTCHours()*60+now.getUTCMinutes();
+  const pct=(m/1440)*100;
+  pin.style.left=pct+"%";
+  prog.style.width=pct+"%";
+  const s=blocks[Math.floor(now.getUTCHours()/4)]?.s||"good";
+  icon.className=`pin-icon pin-${s}`;
+}
+
+/* ================= INIT ================= */
 (async()=>{
- if(!JWT)return alert("JWT missing");
- const raw=await fetchData();
- const rows=merge(raw);
- const blocks=aggregate(rows);
- render(blocks);
- const totals=calculateTotals(rows);
- renderSummary(totals);
+  if(!JWT) return alert("JWT missing");
+  const raw=await fetchData();
+  const blocks=aggregate(raw);
+  render(blocks);
+  renderSummary(blocks);
+  updateTimeIndicator(blocks);
+  setInterval(()=>updateTimeIndicator(blocks),60000);
 })();
 </script>
 </body>
