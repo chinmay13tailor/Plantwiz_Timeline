@@ -150,15 +150,6 @@ body{
   justify-content:space-between;
   align-items:center;
 }
-.status{
-  font-size:12px;
-  padding:4px 10px;
-  border-radius:20px;
-  color:#fff;
-}
-.good .status{background:#22c55e}
-.warning .status{background:#f59e0b}
-.critical .status{background:#ef4444}
 .metric{margin-top:8px;font-size:14px}
 .chevron{
   font-size:14px;
@@ -168,7 +159,7 @@ body{
   transform:rotate(180deg);
 }
 
-/* ================= DETAILS (SEPARATE BLOCK) ================= */
+/* ================= DETAILS ================= */
 .details{
   overflow:hidden;
   max-height:0;
@@ -176,7 +167,7 @@ body{
   transition:max-height .55s ease, opacity .4s ease;
 }
 .details.active{
-  max-height:320px;
+  max-height:360px;
   opacity:1;
 }
 .details-box{
@@ -193,8 +184,25 @@ body{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:14px;
+  margin-bottom:12px;
 }
+
+/* 🔹 SECTION TITLES (NEW) */
+.details-section-head{
+  display:grid;
+  grid-template-columns:1fr 1fr 1.5fr;
+  gap:14px;
+  margin-bottom:10px;
+  font-size:13px;
+  font-weight:600;
+  color:#334155;
+}
+.details-section-head span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
 .details-grid{
   display:grid;
   grid-template-columns:1fr 1fr 1.5fr;
@@ -303,10 +311,8 @@ function mergeTelemetry(raw){
 /* ================= AGGREGATE ================= */
 function aggregate(rows){
   const blocks=[...Array(6)].map(()=>({
-    actual:0,expected:0,runtime:0,downtime:0,
-    p:[],o:[]
+    actual:0,expected:0,runtime:0,downtime:0,p:[],o:[]
   }));
-
   rows.forEach(p=>{
     const i=Math.floor(new Date(p.ts).getHours()/4);
     const b=blocks[i];
@@ -317,7 +323,6 @@ function aggregate(rows){
     if(p.deltaperformance!=null)b.p.push(p.deltaperformance);
     if(p.deltaoee!=null)b.o.push(p.deltaoee);
   });
-
   return blocks.map(b=>{
     const perfPct=b.expected?(b.actual/b.expected)*100:0;
     let s="good";
@@ -334,7 +339,6 @@ function render(blocks){
   const tl=document.getElementById("timeline");
   const dots=document.getElementById("dots");
   tl.innerHTML=""; dots.innerHTML="";
-
   blocks.forEach((b,i)=>{
     dots.innerHTML+=`<div class="dot ${b.s}"></div>`;
     const el=document.createElement("div");
@@ -357,20 +361,13 @@ function render(blocks){
 function toggleDetails(blocks,i){
   const d=document.getElementById("details");
   const cards=[...document.querySelectorAll(".block")];
-
   if(activeIndex===i){
-    d.classList.remove("active");
-    cards[i].classList.remove("active");
-    activeIndex=null;
-    return;
+    closeDetails(); return;
   }
-
   cards.forEach(c=>c.classList.remove("active"));
   cards[i].classList.add("active");
-
   const b=blocks[i];
   activeIndex=i;
-
   d.className=`details active ${b.s}`;
   d.innerHTML=`
     <div class="details-box ${b.s}">
@@ -378,6 +375,13 @@ function toggleDetails(blocks,i){
         <strong>Time Block: ${BLOCKS[i]}</strong>
         <span style="cursor:pointer" onclick="closeDetails()">×</span>
       </div>
+
+      <div class="details-section-head">
+        <span>📊 Production Status</span>
+        <span>⏱ Downtime Status</span>
+        <span>💡 Quick Insight</span>
+      </div>
+
       <div class="details-grid">
         <div class="info-box">
           <strong>${b.actual>=b.expected?"Ahead":"Behind"} Target</strong><br>
@@ -395,6 +399,7 @@ function toggleDetails(blocks,i){
             :"Production is lagging. Focus on downtime reduction."}
         </div>
       </div>
+
       <button class="cta">View Detailed Analysis</button>
     </div>
   `;
