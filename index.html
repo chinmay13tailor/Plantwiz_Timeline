@@ -30,7 +30,9 @@ body{
 .controls{display:flex;gap:10px;margin-top:16px}
 .btn{
   padding:8px 18px;border-radius:12px;
-  border:1px solid #c7d2fe;background:#f8fafc;font-weight:600
+  border:1px solid #c7d2fe;background:#f8fafc;
+  font-weight:600;cursor:pointer;
+  transition:all .25s ease;
 }
 .btn.active{background:#2563eb;color:#fff}
 
@@ -53,79 +55,160 @@ body{
 
 /* ================= BLOCKS ================= */
 .timeline{
-  display:grid;grid-template-columns:repeat(6,1fr);
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
   gap:14px;margin-top:28px
 }
 .block{
-  border-radius:16px;padding:14px;
+  border-radius:16px;
+  padding:14px;
   border:2px solid #e5e7eb;
   background:#f9fafb;
-  cursor:pointer;transition:.25s ease
+  cursor:pointer;
+
+  transition:
+    transform .25s cubic-bezier(0.22,1,0.36,1),
+    box-shadow .25s ease,
+    border-color .25s ease;
+}
+.block:hover{
+  transform:translateY(-2px);
 }
 .block.good{border-color:#22c55e;background:#f0fdf4}
 .block.warning{border-color:#f59e0b;background:#fffbeb}
 .block.critical{border-color:#ef4444;background:#fef2f2}
-.block.selected{box-shadow:0 0 0 3px rgba(37,99,235,.25)}
 
+.block.selected{
+  box-shadow:0 10px 26px rgba(37,99,235,.18);
+  transform:translateY(-3px);
+}
+
+/* ================= CARD HEADER ================= */
 .block-header{
-  display:flex;justify-content:space-between;align-items:center
+  display:flex;
+  justify-content:space-between;
+  align-items:center
 }
 .time{font-weight:700}
 .status-pill{
-  font-size:12px;padding:4px 10px;
-  border-radius:999px;font-weight:700;color:#fff
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:999px;
+  font-weight:700;
+  color:#fff
 }
 .good .status-pill{background:#22c55e}
 .warning .status-pill{background:#f59e0b}
 .critical .status-pill{background:#ef4444}
-.chevron{font-size:14px;transition:.25s ease}
-.block.selected .chevron{transform:rotate(180deg)}
 
-.metric{margin-top:8px;font-size:13px;color:#334155}
-.metric strong{font-size:18px;color:#0f172a}
+.chevron{
+  font-size:14px;
+  transition:transform .35s cubic-bezier(0.22,1,0.36,1);
+}
+.block.selected .chevron{
+  transform:rotate(180deg);
+}
 
-/* ================= DETAIL PANEL (ANIMATED) ================= */
+/* ================= METRICS ================= */
+.metric{
+  margin-top:8px;
+  font-size:13px;
+  color:#334155
+}
+.metric strong{
+  font-size:18px;
+  color:#0f172a
+}
+
+/* ================= DETAIL PANEL (ULTRA SMOOTH) ================= */
 .detail{
   margin-top:26px;
   border-radius:18px;
   padding:0 18px;
   border:2px solid #e5e7eb;
   overflow:hidden;
+
   max-height:0;
   opacity:0;
-  transition:max-height .45s ease, opacity .35s ease, padding .35s ease;
+  transform:translateY(-12px) scale(0.97);
+
+  transition:
+    max-height .6s cubic-bezier(0.4,0.0,0.2,1),
+    opacity .35s ease-out,
+    transform .45s cubic-bezier(0.22,1,0.36,1),
+    padding .35s ease;
 }
+
 .detail.show{
-  max-height:600px;
+  max-height:700px;
   opacity:1;
   padding:18px;
+  transform:translateY(0) scale(1);
 }
+
 .detail.good{border-color:#22c55e;background:#f0fdf4}
 .detail.warning{border-color:#f59e0b;background:#fffbeb}
 .detail.critical{border-color:#ef4444;background:#fef2f2}
 
+/* ================= DETAIL CONTENT ================= */
 .detail-header{
-  display:flex;justify-content:space-between;align-items:center
+  display:flex;
+  justify-content:space-between;
+  align-items:center
 }
 .detail-title{font-weight:700}
-.close-btn{cursor:pointer;font-size:18px;font-weight:700}
+.close-btn{
+  cursor:pointer;
+  font-size:18px;
+  font-weight:700
+}
 
 .detail-grid{
-  display:grid;grid-template-columns:1fr 1fr 1fr;
-  gap:14px;margin-top:14px
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:14px;
+  margin-top:14px
 }
+
+/* stagger animation */
+.detail-grid .box{
+  opacity:0;
+  transform:translateY(10px);
+  animation:fadeUp .45s ease forwards;
+}
+.detail-grid .box:nth-child(1){animation-delay:.05s}
+.detail-grid .box:nth-child(2){animation-delay:.12s}
+.detail-grid .box:nth-child(3){animation-delay:.18s}
+
+@keyframes fadeUp{
+  to{opacity:1;transform:translateY(0)}
+}
+
 .box{
-  background:#fff;border-radius:14px;
-  padding:14px;border:1px solid #e5e7eb
+  background:#fff;
+  border-radius:14px;
+  padding:14px;
+  border:1px solid #e5e7eb
 }
-.box h4{margin:0;font-size:13px;color:#64748b}
-.box .val{margin-top:6px;font-size:18px;font-weight:700}
+.box h4{
+  margin:0;
+  font-size:13px;
+  color:#64748b
+}
+.box .val{
+  margin-top:6px;
+  font-size:18px;
+  font-weight:700
+}
 
 .cta{
-  margin-top:14px;
-  background:#2563eb;color:#fff;
-  padding:10px 18px;border-radius:12px;
-  font-weight:600;display:inline-block
+  margin-top:16px;
+  background:#2563eb;
+  color:#fff;
+  padding:10px 18px;
+  border-radius:12px;
+  font-weight:600;
+  display:inline-block
 }
 
 /* ================= SUMMARY ================= */
@@ -181,9 +264,7 @@ body{
 </div>
 
 <div id="timeline" class="timeline"></div>
-
 <div id="detail" class="detail"></div>
-
 <div id="summary" class="summary"></div>
 
 </div>
@@ -276,7 +357,7 @@ function render(blocks){
   el.onclick=()=>{
     if(activeIndex===i){
       detail.classList.remove("show");
-      document.querySelectorAll(".block").forEach(x=>x.classList.remove("selected"));
+      el.classList.remove("selected");
       activeIndex=null;
       return;
     }
