@@ -1,166 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>Plantwiz | Production Timeline</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* ================= BASE ================= */
-body {
-  margin: 0;
+/* ===== BASE ===== */
+body{
+  margin:0;
   font-family: "Segoe UI", Roboto, sans-serif;
-  background: #f4f7fb;
-  color: #1f2937;
+  background:#eef2f7;
+}
+.container{
+  max-width:1400px;
+  margin:24px auto;
+  background:#fff;
+  border-radius:20px;
+  padding:22px;
+  box-shadow:0 16px 40px rgba(0,0,0,.1);
 }
 
-.container {
-  max-width: 1400px;
-  margin: auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+/* ===== HEADER ===== */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.brand{
+  font-size:22px;
+  font-weight:700;
+  color:#2563eb;
+}
+.subtitle{
+  color:#64748b;
+  font-size:14px;
 }
 
-/* ================= HEADER ================= */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* ===== CONTROLS ===== */
+.controls{
+  display:flex;
+  gap:10px;
+  margin-top:16px;
+}
+.btn{
+  padding:8px 18px;
+  border-radius:12px;
+  border:1px solid #c7d2fe;
+  background:#f8fafc;
+  font-weight:600;
+}
+.btn.active{
+  background:#2563eb;
+  color:#fff;
 }
 
-.brand {
-  font-size: 22px;
-  font-weight: 700;
-  color: #2563eb;
+/* ===== TIMELINE LINE ===== */
+.timeline-wrapper{
+  position:relative;
+  margin-top:28px;
+}
+.timeline-line{
+  position:absolute;
+  top:14px;
+  left:0;
+  right:0;
+  height:4px;
+  background:#e5e7eb;
+  border-radius:2px;
+}
+.timeline-dots{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  position:relative;
+}
+.dot{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  margin:auto;
+  z-index:2;
+}
+.dot.good{background:#22c55e}
+.dot.warning{background:#f59e0b}
+.dot.critical{background:#ef4444}
+
+/* ===== BLOCKS ===== */
+.timeline{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:14px;
+  margin-top:28px;
+}
+.block{
+  border-radius:16px;
+  padding:14px;
+  border:2px solid #e5e7eb;
+  background:#f9fafb;
+  cursor:pointer;
+  transition:.2s;
+}
+.block.good{border-color:#22c55e;background:#f0fdf4}
+.block.warning{border-color:#f59e0b;background:#fffbeb}
+.block.critical{border-color:#ef4444;background:#fef2f2}
+
+.block-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.time{
+  font-weight:700;
+}
+.status-pill{
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:999px;
+  color:#fff;
+  font-weight:700;
+}
+.good .status-pill{background:#22c55e}
+.warning .status-pill{background:#f59e0b}
+.critical .status-pill{background:#ef4444}
+
+.metric{
+  margin-top:10px;
+  font-size:13px;
+  color:#334155;
+}
+.metric strong{
+  font-size:18px;
+  color:#0f172a;
 }
 
-.subtitle {
-  font-size: 15px;
-  color: #475569;
-  margin-top: 4px;
+/* ===== EXPANDED ===== */
+.details{
+  display:none;
+  margin-top:24px;
+  border-radius:20px;
+  padding:20px;
+  border:2px solid #e5e7eb;
+}
+.details.active{display:block}
+.details.good{border-color:#22c55e;background:#f0fdf4}
+.details.warning{border-color:#f59e0b;background:#fffbeb}
+.details.critical{border-color:#ef4444;background:#fef2f2}
+
+.details-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.close-btn{
+  font-size:18px;
+  cursor:pointer;
+  font-weight:700;
 }
 
-/* ================= CONTROLS ================= */
-.controls {
-  display: flex;
-  gap: 10px;
-  margin-top: 18px;
+.details-grid{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
 }
-
-.btn {
-  padding: 8px 16px;
-  border-radius: 10px;
-  border: 1px solid #c7d2fe;
-  background: #f8fafc;
-  font-weight: 600;
+.card{
+  background:#fff;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid #e5e7eb;
 }
-
-.btn.active {
-  background: #2563eb;
-  color: #fff;
-  border-color: #2563eb;
+.card h4{
+  margin:0;
+  font-size:13px;
+  color:#64748b;
 }
-
-/* ================= TIMELINE ================= */
-.timeline {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 16px;
-  margin-top: 26px;
+.card .val{
+  margin-top:6px;
+  font-size:18px;
+  font-weight:700;
 }
-
-.block {
-  border-radius: 14px;
-  padding: 14px;
-  border: 2px solid #e5e7eb;
-  background: #f9fafb;
-  cursor: pointer;
-  transition: .25s;
-}
-
-.block.good { border-color: #22c55e; background: #f0fdf4; }
-.block.warning { border-color: #f59e0b; background: #fffbeb; }
-.block.critical { border-color: #ef4444; background: #fef2f2; }
-
-.block:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
-}
-
-.block-header {
-  display: flex;
-  justify-content: space-between;
-}
-
-.time { font-weight: 700; }
-
-.status {
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.good .status { background: #22c55e; }
-.warning .status { background: #f59e0b; }
-.critical .status { background: #ef4444; }
-
-.metric {
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-.metric strong {
-  font-size: 18px;
-}
-
-/* ================= DETAILS ================= */
-.details {
-  display: none;
-  margin-top: 24px;
-  padding: 20px;
-  border-radius: 16px;
-  border: 2px solid #e5e7eb;
-}
-
-.details.active { display: block; }
-
-.details.good { border-color: #22c55e; background: #f0fdf4; }
-.details.warning { border-color: #f59e0b; background: #fffbeb; }
-.details.critical { border-color: #ef4444; background: #fef2f2; }
-
-.details-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.card {
-  background: #fff;
-  padding: 14px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-}
-
-.card h4 {
-  margin: 0 0 6px;
-  font-size: 14px;
-  color: #475569;
-}
-
-.card .val {
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.insight {
-  margin-top: 14px;
-  padding: 14px;
-  border-radius: 12px;
-  font-weight: 600;
+.insight{
+  margin-top:16px;
+  padding:14px;
+  border-radius:14px;
+  background:#fff;
+  font-weight:600;
 }
 </style>
 </head>
@@ -177,177 +201,153 @@ body {
   </div>
 
   <div class="controls">
-    <div class="btn active">Today</div>
+    <div class="btn active">Current Day (Today)</div>
     <div class="btn">Yesterday</div>
     <div class="btn">Custom Date</div>
   </div>
 
+  <!-- Timeline line & dots -->
+  <div class="timeline-wrapper">
+    <div class="timeline-line"></div>
+    <div id="dots" class="timeline-dots"></div>
+  </div>
+
+  <!-- Cards -->
   <div id="timeline" class="timeline"></div>
+
+  <!-- Expanded -->
   <div id="details" class="details"></div>
 
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-const API_BASE = "https://plantwiz.pimateck.in/api";
-const DEVICE_ID = "81261350-b886-11f0-87ea-b9809c1a7a9e";
-
-const KEYS = [
-  "Meter_Run_Per_Min",
-  "Consumption_Per_Min",
-  "deltaexpectedproduction",
-  "Runtime",
-  "Downtime",
-  "Idletime",
-  "deltaperformance",
-  "deltaavailability",
-  "deltaquality",
-  "deltaoee"
+/* ===== CONFIG ===== */
+const API_BASE="https://plantwiz.pimateck.in/api";
+const DEVICE_ID="81261350-b886-11f0-87ea-b9809c1a7a9e";
+const KEYS=[
+ "Meter_Run_Per_Min","Consumption_Per_Min","deltaexpectedproduction",
+ "Runtime","Downtime","Idletime",
+ "deltaperformance","deltaavailability","deltaquality","deltaoee"
 ];
+const BLOCKS=["00–04","04–08","08–12","12–16","16–20","20–24"];
+const JWT=new URLSearchParams(location.search).get("token");
 
-const BLOCKS = ["00–04","04–08","08–12","12–16","16–20","20–24"];
+/* ===== HELPERS ===== */
+const num=v=>Number(v)||0;
+const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:0;
+const getHourIST=ts=>new Date(ts+19800000).getUTCHours();
+const blockIndex=ts=>Math.floor(getHourIST(ts)/4);
 
-const qs = new URLSearchParams(location.search);
-const JWT = qs.get("token");
-
-/* ================= HELPERS ================= */
-const num = v => Number(v) || 0;
-const avg = a => a.length ? a.reduce((s,v)=>s+v,0)/a.length : 0;
-
-/* IST hour */
-function getHourIST(ts){
-  return new Date(ts + 5.5 * 60 * 60 * 1000).getUTCHours();
-}
-function blockIndex(ts){
-  return Math.floor(getHourIST(ts) / 4);
-}
-
-/* ================= FETCH ================= */
+/* ===== FETCH ===== */
 async function fetchData(){
-  const d = new Date();
-  const start = new Date(d.toDateString()).getTime();
-  const end = start + 86400000 - 1;
-
-  const url = `${API_BASE}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${start}&endTs=${end}&agg=NONE&limit=5000`;
-
-  const res = await fetch(url,{
-    headers:{ "X-Authorization":`Bearer ${JWT}` }
-  });
-  return res.json();
+ const d=new Date();
+ const start=new Date(d.toDateString()).getTime();
+ const end=start+86400000-1;
+ const url=`${API_BASE}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${start}&endTs=${end}&agg=NONE&limit=5000`;
+ const r=await fetch(url,{headers:{"X-Authorization":"Bearer "+JWT}});
+ return r.json();
 }
 
-/* ================= MERGE ================= */
+/* ===== MERGE ===== */
 function mergeSeries(obj){
-  const map = new Map();
-
-  for (const [key, arr] of Object.entries(obj)) {
-    (arr || []).forEach(p => {
-      const ts = Number(p.ts);
-      const row = map.get(ts) || { ts };
-      row[key] = Number(p.value);
-      map.set(ts, row);
-    });
-  }
-  return Array.from(map.values()).sort((a,b)=>a.ts-b.ts);
+ const m=new Map();
+ Object.entries(obj).forEach(([k,a])=>{
+  (a||[]).forEach(p=>{
+   const r=m.get(p.ts)||{ts:p.ts};
+   r[k]=Number(p.value);
+   m.set(p.ts,r);
+  });
+ });
+ return [...m.values()].sort((a,b)=>a.ts-b.ts);
 }
 
-/* ================= AGGREGATE ================= */
+/* ===== AGGREGATE ===== */
 function aggregate(rows){
-  const blocks = Array.from({length:6},()=>({
-    actual:0, expected:0, energy:0,
-    runtime:0, downtime:0, idle:0,
-    perf:[], avail:[], qual:[], oee:[]
-  }));
-
-  rows.forEach(p=>{
-    const i = blockIndex(p.ts);
-    const b = blocks[i];
-
-    b.actual += num(p.Meter_Run_Per_Min);
-    b.expected += num(p.deltaexpectedproduction);
-    b.energy += num(p.Consumption_Per_Min);
-
-    b.runtime += num(p.Runtime);
-    b.downtime += num(p.Downtime);
-    b.idle += num(p.Idletime);
-
-    if(p.deltaperformance != null) b.perf.push(p.deltaperformance);
-    if(p.deltaavailability != null) b.avail.push(p.deltaavailability);
-    if(p.deltaquality != null) b.qual.push(p.deltaquality);
-    if(p.deltaoee != null) b.oee.push(p.deltaoee);
-  });
-
-  return blocks.map(b=>{
-    const perfPct = b.expected > 0 ? (b.actual / b.expected) * 100 : 0;
-    let status = "good";
-    if (b.downtime > 60) status = "critical";
-    else if (perfPct < 90) status = "warning";
-
-    return {
-      ...b,
-      perfPct,
-      status,
-      perf: avg(b.perf),
-      avail: avg(b.avail),
-      qual: avg(b.qual),
-      oee: avg(b.oee)
-    };
-  });
+ const b=Array.from({length:6},()=>({
+  actual:0,expected:0,energy:0,
+  runtime:0,downtime:0,idle:0,
+  perf:[],avail:[],qual:[],oee:[]
+ }));
+ rows.forEach(p=>{
+  const i=blockIndex(p.ts),x=b[i];
+  x.actual+=num(p.Meter_Run_Per_Min);
+  x.expected+=num(p.deltaexpectedproduction);
+  x.energy+=num(p.Consumption_Per_Min);
+  x.runtime+=num(p.Runtime);
+  x.downtime+=num(p.Downtime);
+  x.idle+=num(p.Idletime);
+  if(p.deltaperformance!=null)x.perf.push(p.deltaperformance);
+  if(p.deltaavailability!=null)x.avail.push(p.deltaavailability);
+  if(p.deltaquality!=null)x.qual.push(p.deltaquality);
+  if(p.deltaoee!=null)x.oee.push(p.deltaoee);
+ });
+ return b.map(x=>{
+  const perfPct=x.expected?x.actual/x.expected*100:0;
+  let status="good";
+  if(x.downtime>60)status="critical";
+  else if(avg(x.perf)<90)status="warning";
+  return {...x,perfPct,status,
+    perf:avg(x.perf),avail:avg(x.avail),
+    qual:avg(x.qual),oee:avg(x.oee)};
+ });
 }
 
-/* ================= UI ================= */
+/* ===== RENDER ===== */
 function render(blocks){
-  const tl = document.getElementById("timeline");
-  const det = document.getElementById("details");
-  tl.innerHTML="";
-
-  blocks.forEach((b,i)=>{
-    const el = document.createElement("div");
-    el.className = `block ${b.status}`;
-    el.innerHTML = `
-      <div class="block-header">
-        <div class="time">${BLOCKS[i]}</div>
-        <div class="status">${b.status.toUpperCase()}</div>
-      </div>
-      <div class="metric">Performance<br><strong>${b.perfPct.toFixed(1)}%</strong></div>
-      <div class="metric">Downtime<br><strong>${b.downtime} min</strong></div>
-    `;
-
-    el.onclick = ()=>{
-      det.className = `details active ${b.status}`;
-      det.innerHTML = `
-        <h3>Time Block: ${BLOCKS[i]}</h3>
-        <div class="details-grid">
-          <div class="card"><h4>Actual Production</h4><div class="val">${b.actual}</div></div>
-          <div class="card"><h4>Expected Production</h4><div class="val">${b.expected}</div></div>
-          <div class="card"><h4>Energy</h4><div class="val">${b.energy.toFixed(1)}</div></div>
-          <div class="card"><h4>Runtime</h4><div class="val">${b.runtime} min</div></div>
-          <div class="card"><h4>Downtime</h4><div class="val">${b.downtime} min</div></div>
-          <div class="card"><h4>Idle Time</h4><div class="val">${b.idle} min</div></div>
-          <div class="card"><h4>Performance</h4><div class="val">${b.perf.toFixed(1)}%</div></div>
-          <div class="card"><h4>Availability</h4><div class="val">${b.avail.toFixed(1)}%</div></div>
-          <div class="card"><h4>Quality</h4><div class="val">${b.qual.toFixed(1)}%</div></div>
-          <div class="card"><h4>OEE</h4><div class="val">${b.oee.toFixed(1)}%</div></div>
-        </div>
-        <div class="insight">
-          ${b.status==="good" ? "Great job! Production is on track." :
-            b.status==="warning" ? "Close to target. Reducing minor stoppages will help." :
-            "Production is lagging. Focus on downtime reduction and speed stabilization."}
-        </div>
-      `;
-    };
-
-    tl.appendChild(el);
-  });
+ const tl=document.getElementById("timeline");
+ const dots=document.getElementById("dots");
+ const det=document.getElementById("details");
+ tl.innerHTML=""; dots.innerHTML="";
+ blocks.forEach((b,i)=>{
+  dots.innerHTML+=`<div class="dot ${b.status}"></div>`;
+  const el=document.createElement("div");
+  el.className=`block ${b.status}`;
+  el.innerHTML=`
+   <div class="block-header">
+    <div class="time">${BLOCKS[i]}</div>
+    <div class="status-pill">${b.status.toUpperCase()}</div>
+   </div>
+   <div class="metric">Performance<br><strong>${b.perf.toFixed(1)}%</strong></div>
+   <div class="metric">${Math.round(b.actual)} / ${Math.round(b.expected)}</div>
+   <div class="metric">Target ${Math.round(b.expected)} | Downtime ${b.downtime} min</div>
+  `;
+  el.onclick=()=>{
+   det.className=`details active ${b.status}`;
+   det.innerHTML=`
+    <div class="details-header">
+     <h3>Time Block ${BLOCKS[i]}</h3>
+     <div class="close-btn" onclick="this.closest('.details').className='details'">✕</div>
+    </div>
+    <div class="details-grid">
+     <div class="card"><h4>Actual</h4><div class="val">${b.actual}</div></div>
+     <div class="card"><h4>Expected</h4><div class="val">${b.expected}</div></div>
+     <div class="card"><h4>Energy</h4><div class="val">${b.energy.toFixed(1)}</div></div>
+     <div class="card"><h4>Runtime</h4><div class="val">${b.runtime} min</div></div>
+     <div class="card"><h4>Downtime</h4><div class="val">${b.downtime} min</div></div>
+     <div class="card"><h4>Idle</h4><div class="val">${b.idle} min</div></div>
+     <div class="card"><h4>Performance</h4><div class="val">${b.perf.toFixed(1)}%</div></div>
+     <div class="card"><h4>Availability</h4><div class="val">${b.avail.toFixed(1)}%</div></div>
+     <div class="card"><h4>Quality</h4><div class="val">${b.qual.toFixed(1)}%</div></div>
+     <div class="card"><h4>OEE</h4><div class="val">${b.oee.toFixed(1)}%</div></div>
+    </div>
+    <div class="insight">${
+     b.status==="good"?"Great job! Production is on track.":
+     b.status==="warning"?"Close to target. Reduce minor stoppages.":
+     "High downtime detected. Immediate action required."
+    }</div>
+   `;
+  };
+  tl.appendChild(el);
+ });
 }
 
-/* ================= INIT ================= */
+/* ===== INIT ===== */
 (async()=>{
-  if(!JWT) return alert("JWT token missing");
-  const raw = await fetchData();
-  const rows = mergeSeries(raw);
-  const blocks = aggregate(rows);
-  render(blocks);
+ if(!JWT){alert("JWT token missing");return;}
+ const raw=await fetchData();
+ const rows=mergeSeries(raw);
+ const blocks=aggregate(rows);
+ render(blocks);
 })();
 </script>
 </body>
