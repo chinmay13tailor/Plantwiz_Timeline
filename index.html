@@ -475,6 +475,40 @@ body{
   border-color:#ef4444;
   color:#7f1d1d;
 }
+/* ===== Detailed Findings ===== */
+.df-card{
+  margin-bottom:14px;
+  padding:14px 16px;
+  border-radius:12px;
+  border:1px solid;
+  background:#f8fafc;
+  font-size:14px;
+}
+
+.df-card ul{
+  margin:8px 0 0 18px;
+  padding:0;
+}
+
+.df-card li{
+  margin-bottom:6px;
+}
+
+/* Color themes */
+.df-prod{
+  border-color:#c7d2fe;
+  background:#f5f7ff;
+}
+
+.df-down{
+  border-color:#86efac;
+  background:#f0fdf4;
+}
+
+.df-eff{
+  border-color:#bfdbfe;
+  background:#eff6ff;
+}
 
 </style>
 </head>
@@ -621,6 +655,46 @@ body{
     </div>
 
   </div>
+</div>
+<!-- ===== DETAILED FINDINGS ===== -->
+<div style="padding:0 20px 24px">
+
+  <h4 style="margin-bottom:12px;display:flex;align-items:center;gap:8px">
+    📊 Detailed Findings
+  </h4>
+
+  <!-- Production Analysis -->
+  <div class="df-card df-prod">
+    <strong>📈 Production Analysis</strong>
+    <ul>
+      <li>Expected production: <b id="dfExp"></b></li>
+      <li>Actual production: <b id="dfAct"></b></li>
+      <li id="dfDelta"></li>
+    </ul>
+  </div>
+
+  <!-- Downtime Analysis -->
+  <div class="df-card df-down">
+    <strong>⏱ Downtime Analysis</strong>
+    <ul>
+      <li>Total downtime recorded: <b id="dfDown"></b></li>
+      <li>Acceptable downtime limit: <b id="dfLimit"></b></li>
+      <li id="dfMargin"></li>
+      <li id="dfImpact"></li>
+    </ul>
+  </div>
+
+  <!-- Efficiency Breakdown -->
+  <div class="df-card df-eff">
+    <strong>⚡ Efficiency Breakdown</strong>
+    <ul>
+      <li>Operational time: <b id="dfRun"></b></li>
+      <li>Production rate: <b id="dfRate"></b></li>
+      <li>Target rate: <b id="dfTarget"></b></li>
+      <li>Rate variance: <b id="dfVar"></b></li>
+    </ul>
+  </div>
+
 </div>
 
 
@@ -924,6 +998,55 @@ function openAnalysis(block){
     zoneReasonDown.textContent =
       `⛔ Downtime ${block.downtime} minutes exceeds limit`;
   }
+  /* ===== DETAILED FINDINGS CALCULATIONS ===== */
+
+// Production Analysis
+const expected = block.expected;
+const actual = block.actual;
+const delta = actual - expected;
+const deltaPct = (Math.abs(delta) / expected * 100).toFixed(1);
+
+document.getElementById("dfExp").textContent = `${Math.round(expected)} mtr`;
+document.getElementById("dfAct").textContent = `${Math.round(actual)} mtr`;
+
+document.getElementById("dfDelta").innerHTML =
+  delta >= 0
+    ? `<span style="color:#15803d">Production surplus: ${Math.round(delta)} mtr (${deltaPct}%)</span>`
+    : `<span style="color:#b91c1c">Production shortfall: ${Math.round(Math.abs(delta))} mtr (${deltaPct}%)</span>`;
+
+// Downtime Analysis
+const acceptableDown = 60; // min (fixed rule)
+const downMargin = acceptableDown - block.downtime;
+
+// Expected production during downtime (impact)
+const rate = expected / block.runtime; // mtr per min
+const impact = rate * block.downtime;
+
+document.getElementById("dfDown").textContent = `${block.downtime} minutes`;
+document.getElementById("dfLimit").textContent = `${acceptableDown} minutes`;
+
+document.getElementById("dfMargin").innerHTML =
+  downMargin >= 0
+    ? `<span style="color:#15803d">Downtime margin: ${downMargin} minutes under limit</span>`
+    : `<span style="color:#b91c1c">Excess downtime: ${Math.abs(downMargin)} minutes over limit</span>`;
+
+document.getElementById("dfImpact").innerHTML =
+  `Estimated impact: ${Math.round(impact)} mtr production lost`;
+
+// Efficiency Breakdown
+const prodRate = actual / block.runtime;
+const targetRate = expected / block.runtime;
+const variance = prodRate - targetRate;
+
+document.getElementById("dfRun").textContent = `${block.runtime} minutes`;
+document.getElementById("dfRate").textContent = `${prodRate.toFixed(2)} mtr/min`;
+document.getElementById("dfTarget").textContent = `${targetRate.toFixed(2)} mtr/min`;
+
+document.getElementById("dfVar").innerHTML =
+  variance >= 0
+    ? `<span style="color:#15803d">+${variance.toFixed(2)} mtr/min</span>`
+    : `<span style="color:#b91c1c">${variance.toFixed(2)} mtr/min</span>`;
+
 }
 
 
