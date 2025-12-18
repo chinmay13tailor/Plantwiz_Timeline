@@ -833,53 +833,99 @@ async function loadTimeline(date){
 
 /* ================= DETAILED ANALYSIS MODAL ================= */
 function openAnalysis(block){
+  // SHOW MODAL
+  const modal = document.getElementById("analysisModal");
+  modal.style.display = "flex";
+
+  // APPLY ZONE CLASS TO CARD (IMPORTANT)
+  const card = modal.querySelector(".analysis-card");
+  card.classList.remove("good", "warning", "critical");
+  card.classList.add(block.zone.toLowerCase());
+
+  // HEADER TEXT
+  document.getElementById("modalTime").textContent =
+    `Time Block: ${block.label}`;
+
+  // STATUS PILL
+  const statusEl = document.getElementById("modalStatus");
+  statusEl.textContent = `Status: ${block.zone}`;
+
+  // METRICS
+  document.getElementById("mPerformance").textContent =
+    `${block.perf.toFixed(1)}%`;
+
+  document.getElementById("mActual").textContent =
+    `${Math.round(block.actual)} mtr`;
+
+  document.getElementById("mDowntime").textContent =
+    `${block.downtime} min`;
+
+  // INSIGHT TEXT
+  const reason = document.getElementById("modalReason");
+  reason.textContent =
+    block.zone === "Good"
+      ? "Production is on track. Keep the consistency."
+      : block.zone === "Warning"
+        ? "You are close to target. Minor improvements required."
+        : "Production is lagging. Immediate attention required.";
+
+  // FINDINGS
+  document.getElementById("modalFindings").innerHTML = `
+    <li>Expected production: ${Math.round(block.expected)} mtr</li>
+    <li>Actual production: ${Math.round(block.actual)} mtr</li>
+    <li>Performance: ${block.perf.toFixed(1)}%</li>
+    <li>Downtime: ${block.downtime} minutes</li>
+  `;
+
   // ===== ZONE CLASSIFICATION =====
-const zoneBox = document.getElementById("zoneBox");
-const zoneHeadline = document.getElementById("zoneHeadline");
-const zoneMessage = document.getElementById("zoneMessage");
-const zoneReasonPerf = document.getElementById("zoneReasonPerf");
-const zoneReasonDown = document.getElementById("zoneReasonDown");
+  const zoneBox = document.getElementById("zoneBox");
+  const zoneHeadline = document.getElementById("zoneHeadline");
+  const zoneMessage = document.getElementById("zoneMessage");
+  const zoneReasonPerf = document.getElementById("zoneReasonPerf");
+  const zoneReasonDown = document.getElementById("zoneReasonDown");
 
-// reset classes
-zoneBox.className = "zone-box";
+  zoneBox.className = "zone-box";
 
-if(block.zone === "Good"){
-  zoneBox.classList.add("zone-good");
-  zoneHeadline.textContent = "✔ This time block is classified as GOOD";
-  zoneMessage.textContent = "Great job! Production is on track. Keep the consistency.";
+  if(block.zone === "Good"){
+    zoneBox.classList.add("zone-good");
+    zoneHeadline.textContent = "✔ This time block is classified as GOOD";
+    zoneMessage.textContent =
+      "Great job! Production is on track. Keep the consistency.";
 
-  zoneReasonPerf.textContent =
-    `✔ Performance rate of ${block.perf.toFixed(1)}% exceeds the target threshold (98%)`;
+    zoneReasonPerf.textContent =
+      `✔ Performance rate ${block.perf.toFixed(1)}% exceeds target threshold`;
 
-  zoneReasonDown.textContent =
-    `✔ Downtime of ${block.downtime} minutes is within acceptable limits`;
+    zoneReasonDown.textContent =
+      `✔ Downtime ${block.downtime} minutes is within acceptable limits`;
+  }
+
+  else if(block.zone === "Warning"){
+    zoneBox.classList.add("zone-warning");
+    zoneHeadline.textContent = "⚠ This time block is classified as WARNING";
+    zoneMessage.textContent =
+      "You're close to the target. Reducing minor stoppages can help recover.";
+
+    zoneReasonPerf.textContent =
+      `⚠ Performance ${block.perf.toFixed(1)}% below optimal (98%)`;
+
+    zoneReasonDown.textContent =
+      `⚠ Production shortfall of ${Math.round(block.expected - block.actual)} mtr`;
+  }
+
+  else{
+    zoneBox.classList.add("zone-critical");
+    zoneHeadline.textContent = "⛔ This time block is classified as CRITICAL";
+    zoneMessage.textContent =
+      "Production is lagging. Immediate attention required.";
+
+    zoneReasonPerf.textContent =
+      `⛔ Performance ${block.perf.toFixed(1)}% below critical threshold`;
+
+    zoneReasonDown.textContent =
+      `⛔ Downtime ${block.downtime} minutes exceeds limit`;
+  }
 }
 
-else if(block.zone === "Warning"){
-  zoneBox.classList.add("zone-warning");
-  zoneHeadline.textContent = "⚠ This time block is classified as WARNING";
-  zoneMessage.textContent =
-    "You're close to the target. Reducing minor stoppages can help recover.";
-
-  zoneReasonPerf.textContent =
-    `⚠ Performance rate of ${block.perf.toFixed(1)}% is below optimal (98%) but above critical threshold (85%)`;
-
-  zoneReasonDown.textContent =
-    `⚠ Production shortfall of ${Math.round(block.expected - block.actual)} mtr detected`;
-}
-
-else{
-  zoneBox.classList.add("zone-critical");
-  zoneHeadline.textContent = "⛔ This time block is classified as CRITICAL";
-  zoneMessage.textContent =
-    "Production is lagging. Focus on reducing downtime and stabilizing speed.";
-
-  zoneReasonPerf.textContent =
-    `⛔ Performance rate of ${block.perf.toFixed(1)}% is below critical threshold (85%)`;
-
-  zoneReasonDown.textContent =
-    `⛔ Downtime of ${block.downtime} minutes exceeds acceptable limit (60 min)`;
-}
 
 function closeAnalysis(){
   document.getElementById("analysisModal").style.display = "none";
