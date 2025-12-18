@@ -417,6 +417,64 @@ body{
   color:#64748b;
   margin-top:2px;
 }
+/* ===== ZONE CLASSIFICATION ===== */
+.zone-section{
+  padding:0 20px 20px;
+}
+
+.zone-title{
+  font-size:14px;
+  font-weight:700;
+  color:#334155;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-bottom:10px;
+}
+
+.zone-box{
+  padding:16px;
+  border-radius:14px;
+  border:2px solid;
+}
+
+.zone-headline{
+  font-weight:700;
+  margin-bottom:6px;
+}
+
+.zone-message{
+  font-size:14px;
+  margin-bottom:12px;
+}
+
+.zone-reasons{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-size:13px;
+}
+
+/* GOOD */
+.zone-good{
+  background:#ecfdf3;
+  border-color:#22c55e;
+  color:#166534;
+}
+
+/* WARNING */
+.zone-warning{
+  background:#fff7ed;
+  border-color:#f59e0b;
+  color:#92400e;
+}
+
+/* CRITICAL */
+.zone-critical{
+  background:#fef2f2;
+  border-color:#ef4444;
+  color:#7f1d1d;
+}
 
 </style>
 </head>
@@ -535,6 +593,22 @@ body{
       <div class="da-metric-sub">minutes</div>
     </div>
 
+  </div>
+</div>
+<!-- ===== ZONE CLASSIFICATION ===== -->
+<div id="zoneSection" class="zone-section">
+  <div class="zone-title">
+    ⚠️ Zone Classification
+  </div>
+
+  <div id="zoneBox" class="zone-box">
+    <div id="zoneHeadline" class="zone-headline"></div>
+    <div id="zoneMessage" class="zone-message"></div>
+
+    <div class="zone-reasons">
+      <div id="zoneReasonPerf" class="zone-reason"></div>
+      <div id="zoneReasonDown" class="zone-reason"></div>
+    </div>
   </div>
 </div>
 
@@ -759,62 +833,58 @@ async function loadTimeline(date){
 
 /* ================= DETAILED ANALYSIS MODAL ================= */
 function openAnalysis(block){
-  const modal = document.getElementById("analysisModal");
-  const card  = modal.querySelector(".analysis-card");
+  // ===== ZONE CLASSIFICATION =====
+const zoneBox = document.getElementById("zoneBox");
+const zoneHeadline = document.getElementById("zoneHeadline");
+const zoneMessage = document.getElementById("zoneMessage");
+const zoneReasonPerf = document.getElementById("zoneReasonPerf");
+const zoneReasonDown = document.getElementById("zoneReasonDown");
 
-  modal.style.display = "flex";
+// reset classes
+zoneBox.className = "zone-box";
 
-  /* ================= RESET & APPLY STATE ================= */
-  card.classList.remove("good","warning","critical");
+if(block.zone === "Good"){
+  zoneBox.classList.add("zone-good");
+  zoneHeadline.textContent = "✔ This time block is classified as GOOD";
+  zoneMessage.textContent = "Great job! Production is on track. Keep the consistency.";
 
-  const state =
-    block.zone === "Good" ? "good" :
-    block.zone === "Warning" ? "warning" :
-    "critical";
+  zoneReasonPerf.textContent =
+    `✔ Performance rate of ${block.perf.toFixed(1)}% exceeds the target threshold (98%)`;
 
-  card.classList.add(state);
-
-  /* ================= HEADER ================= */
-  document.getElementById("modalTime").textContent =
-    `Time Block: ${block.label}`;
-
-  const statusEl = document.getElementById("modalStatus");
-  statusEl.textContent = `Status: ${block.zone}`;
-
-  /* ================= METRICS ================= */
-  document.getElementById("mPerformance").textContent =
-    `${block.perf.toFixed(1)}%`;
-
-  document.getElementById("mActual").textContent =
-    `${Math.round(block.actual)} mtr`;
-
-  document.getElementById("mDowntime").textContent =
-    `${block.downtime} min`;
-
-  /* ================= INSIGHT ================= */
-  document.getElementById("modalReason").textContent =
-    block.zone === "Good"
-      ? "Production is on track. Keep the consistency."
-      : block.zone === "Warning"
-        ? "You are close to target. Minor improvements required."
-        : "Production is lagging. Immediate attention required.";
-
-  /* ================= FINDINGS ================= */
-  document.getElementById("modalFindings").innerHTML = `
-    <li>Expected production: ${Math.round(block.expected)} mtr</li>
-    <li>Actual production: ${Math.round(block.actual)} mtr</li>
-    <li>Performance: ${block.perf.toFixed(1)}%</li>
-    <li>Downtime: ${block.downtime} minutes</li>
-  `;
+  zoneReasonDown.textContent =
+    `✔ Downtime of ${block.downtime} minutes is within acceptable limits`;
 }
 
+else if(block.zone === "Warning"){
+  zoneBox.classList.add("zone-warning");
+  zoneHeadline.textContent = "⚠ This time block is classified as WARNING";
+  zoneMessage.textContent =
+    "You're close to the target. Reducing minor stoppages can help recover.";
+
+  zoneReasonPerf.textContent =
+    `⚠ Performance rate of ${block.perf.toFixed(1)}% is below optimal (98%) but above critical threshold (85%)`;
+
+  zoneReasonDown.textContent =
+    `⚠ Production shortfall of ${Math.round(block.expected - block.actual)} mtr detected`;
+}
+
+else{
+  zoneBox.classList.add("zone-critical");
+  zoneHeadline.textContent = "⛔ This time block is classified as CRITICAL";
+  zoneMessage.textContent =
+    "Production is lagging. Focus on reducing downtime and stabilizing speed.";
+
+  zoneReasonPerf.textContent =
+    `⛔ Performance rate of ${block.perf.toFixed(1)}% is below critical threshold (85%)`;
+
+  zoneReasonDown.textContent =
+    `⛔ Downtime of ${block.downtime} minutes exceeds acceptable limit (60 min)`;
+}
 
 function closeAnalysis(){
   document.getElementById("analysisModal").style.display = "none";
 }
   
-
-
 /* ================= BUTTONS ================= */
 function setActive(btn){
   document.querySelectorAll(".btn").forEach(b=>b.classList.remove("active"));
