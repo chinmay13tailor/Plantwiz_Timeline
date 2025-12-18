@@ -742,13 +742,14 @@ function mergeTelemetry(raw){
 
 /* ================= AGGREGATE ================= */
 function aggregate(rows){
-  const blocks=[...Array(6)].map(()=>({actual:0,expected:0,downtime:0,p:[],o:[]}));
+  const blocks=[...Array(6)].map(()=>({actual:0,expected:0,downtime:0,runtime:0,p:[],o:[]}));
   rows.forEach(p=>{
     const i=Math.floor(new Date(p.ts).getHours()/4);
     const b=blocks[i];
     b.actual+=p.Meter_Run_Per_Min||0;
     b.expected+=p.deltaexpectedproduction||0;
     b.downtime+=p.Downtime||0;
+    b.runtime+=p.Runtime||0;
     if(p.deltaperformance!=null)b.p.push(p.deltaperformance);
     if(p.deltaoee!=null)b.o.push(p.deltaoee);
   });
