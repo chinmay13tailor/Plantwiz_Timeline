@@ -686,16 +686,30 @@ async function loadTimeline(date){
 }
 
 /* ================= DETAILED ANALYSIS MODAL ================= */
-
 function openAnalysis(block){
   const modal = document.getElementById("analysisModal");
+  const card  = modal.querySelector(".analysis-card");
+
   modal.style.display = "flex";
 
-  // Header
+  /* ================= RESET & APPLY STATE ================= */
+  card.classList.remove("good","warning","critical");
+
+  const state =
+    block.zone === "Good" ? "good" :
+    block.zone === "Warning" ? "warning" :
+    "critical";
+
+  card.classList.add(state);
+
+  /* ================= HEADER ================= */
   document.getElementById("modalTime").textContent =
     `Time Block: ${block.label}`;
 
-  // Metrics
+  const statusEl = document.getElementById("modalStatus");
+  statusEl.textContent = `Status: ${block.zone}`;
+
+  /* ================= METRICS ================= */
   document.getElementById("mPerformance").textContent =
     `${block.perf.toFixed(1)}%`;
 
@@ -705,44 +719,23 @@ function openAnalysis(block){
   document.getElementById("mDowntime").textContent =
     `${block.downtime} min`;
 
-  // Status pill
-  const statusEl = document.getElementById("modalStatus");
-  const status = block.zone;
-
-  statusEl.textContent = `Status: ${status}`;
-
-  statusEl.style.background =
-    status === "Good" ? "#e8f8ef" :
-    status === "Warning" ? "#fff4e5" :
-    "#fdecea";
-
-  statusEl.style.color =
-    status === "Good" ? "#1b7f4a" :
-    status === "Warning" ? "#b26a00" :
-    "#b71c1c";
-
-  // Insight
-  const reason = document.getElementById("modalReason");
-  reason.textContent =
-    status === "Good"
+  /* ================= INSIGHT ================= */
+  document.getElementById("modalReason").textContent =
+    block.zone === "Good"
       ? "Production is on track. Keep the consistency."
-      : status === "Warning"
+      : block.zone === "Warning"
         ? "You are close to target. Minor improvements required."
         : "Production is lagging. Immediate attention required.";
 
-  // Findings
-  const findings = document.getElementById("modalFindings");
-  findings.innerHTML = `
+  /* ================= FINDINGS ================= */
+  document.getElementById("modalFindings").innerHTML = `
     <li>Expected production: ${Math.round(block.expected)} mtr</li>
     <li>Actual production: ${Math.round(block.actual)} mtr</li>
     <li>Performance: ${block.perf.toFixed(1)}%</li>
     <li>Downtime: ${block.downtime} minutes</li>
   `;
-const header = document.querySelector(".da-header");
-header.className = "da-header " + block.zone.toLowerCase();
-
-
 }
+
 
 function closeAnalysis(){
   document.getElementById("analysisModal").style.display = "none";
