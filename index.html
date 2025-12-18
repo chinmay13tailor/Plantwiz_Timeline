@@ -358,6 +358,65 @@ body{
   overflow:auto;
   box-shadow:0 20px 50px rgba(0,0,0,.3);
 }
+  /* ===== Detailed Analysis : Key Performance Metrics ===== */
+
+.da-metrics{
+  padding:18px 20px;
+}
+
+.da-metrics-title{
+  font-size:15px;
+  font-weight:700;
+  margin-bottom:14px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.da-metrics-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+
+.da-metric-card{
+  background:#f8fafc;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:14px;
+}
+
+.da-metric-card.blue{
+  background:#f5faff;
+  border-color:#c7d2fe;
+}
+
+.da-metric-card.green{
+  background:#f0fdf4;
+  border-color:#bbf7d0;
+}
+
+.da-metric-label{
+  font-size:13px;
+  color:#64748b;
+  margin-bottom:6px;
+}
+
+.da-metric-value{
+  font-size:22px;
+  font-weight:700;
+  color:#111827;
+}
+
+.da-metric-card.green .da-metric-value{
+  color:#15803d;
+}
+
+.da-metric-sub{
+  font-size:12px;
+  color:#64748b;
+  margin-top:2px;
+}
 
 </style>
 </head>
@@ -451,21 +510,34 @@ body{
 
   <span class="da-close" onclick="closeAnalysis()">×</span>
 </div>
-    <!-- ===== KEY METRICS ===== -->
-    <div style="padding:16px 20px">
-      <h4>Key Metrics</h4>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-        <div>
-          <strong id="mPerformance">0%</strong><br>Performance
-        </div>
-        <div>
-          <strong id="mActual">0</strong><br>Actual
-        </div>
-        <div>
-          <strong id="mDowntime">0</strong><br>Downtime
-        </div>
-      </div>
+<div class="da-metrics">
+  <div class="da-metrics-title">
+    ⚡ Key Performance Metrics
+  </div>
+
+  <div class="da-metrics-grid">
+
+    <div class="da-metric-card blue">
+      <div class="da-metric-label">Performance Rate</div>
+      <div class="da-metric-value" id="mPerformance">0%</div>
+      <div class="da-metric-sub">of target achieved</div>
     </div>
+
+    <div class="da-metric-card">
+      <div class="da-metric-label">Production Output</div>
+      <div class="da-metric-value" id="mActual">0</div>
+      <div class="da-metric-sub">mtr produced</div>
+    </div>
+
+    <div class="da-metric-card green">
+      <div class="da-metric-label">Downtime</div>
+      <div class="da-metric-value" id="mDowntime">0</div>
+      <div class="da-metric-sub">minutes</div>
+    </div>
+
+  </div>
+</div>
+
 
     <!-- ===== INSIGHT ===== -->
     <div style="padding:0 20px 20px">
