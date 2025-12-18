@@ -322,20 +322,34 @@ body{
 }
 
 /* ===== STATUS THEMES ===== */
+/* ===== Header background by status (Figma style) ===== */
 .good .da-header{
-  background:#ecfdf3;
+  background:linear-gradient(
+    180deg,
+    #ecfdf3 0%,
+    #f0fdf4 100%
+  );
   color:#15803d;
 }
 
 .warning .da-header{
-  background:#fff7ed;
+  background:linear-gradient(
+    180deg,
+    #fff7ed 0%,
+    #fffbeb 100%
+  );
   color:#c2410c;
 }
 
 .critical .da-header{
-  background:#fef2f2;
+  background:linear-gradient(
+    180deg,
+    #fef2f2 0%,
+    #fff1f2 100%
+  );
   color:#b91c1c;
 }
+
   .analysis-card{
   width:680px;
   max-height:90vh;
