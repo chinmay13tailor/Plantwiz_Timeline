@@ -929,23 +929,6 @@ function openAnalysis(block){
   document.getElementById("mDowntime").textContent =
     `${block.downtime} min`;
 
-  // INSIGHT TEXT
-  const reason = document.getElementById("modalReason");
-  reason.textContent =
-    block.zone === "Good"
-      ? "Production is on track. Keep the consistency."
-      : block.zone === "Warning"
-        ? "You are close to target. Minor improvements required."
-        : "Production is lagging. Immediate attention required.";
-
-  // FINDINGS
-  document.getElementById("modalFindings").innerHTML = `
-    <li>Expected production: ${Math.round(block.expected)} mtr</li>
-    <li>Actual production: ${Math.round(block.actual)} mtr</li>
-    <li>Performance: ${block.perf.toFixed(1)}%</li>
-    <li>Downtime: ${block.downtime} minutes</li>
-  `;
-
   // ===== ZONE CLASSIFICATION =====
   const zoneBox = document.getElementById("zoneBox");
   const zoneHeadline = document.getElementById("zoneHeadline");
