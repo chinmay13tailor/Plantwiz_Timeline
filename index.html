@@ -711,6 +711,19 @@ body{
   font-weight:700;
   color:#dc2626;
 }
+  .eod-main-line{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  margin:6px 0 14px;
+}
+
+.eod-main-unit{
+  font-size:13px;
+  color:#6b7280;
+  font-weight:500;
+}
+
 
 </style>
 </head>
@@ -802,8 +815,11 @@ body{
   </div>
 
   <!-- Main value -->
-  <div class="eod-main-value danger" id="eodProjectedDown">--</div>
-  <div class="eod-sub-text">minutes total by EOD</div>
+<div class="eod-main-line">
+  <span class="eod-main-value danger" id="eodProjectedDown">--</span>
+  <span class="eod-main-unit">minutes total by EOD</span>
+</div>
+
 
   <!-- Meta info -->
   <div class="eod-meta-grid">
@@ -1139,6 +1155,9 @@ function renderProjectedDowntime(rows, blocks) {
   const box = document.getElementById("eodDownBox");
   box.classList.remove("good", "warning", "critical");
   box.classList.add(status.cls);
+  document.getElementById("eodDownSoFar").textContent =
+  `${blocks.slice(0, data.analysedBlocks).reduce((s,b)=>s+b.downtime,0)} min`;
+
 }
 
   
