@@ -1263,20 +1263,35 @@ function renderProjectedProduction(rows) {
 }
     /*========Projected shortfall or exceed============*/
 
-  function calculateProjectedShortfall(rows) {
+function calculateProjectedShortfall(rows) {
 
-  // 🔹 Target Production (latest value)
+  // 1️⃣ Get latest valid Target Production value
   const targetRow = [...rows]
     .reverse()
-    .find(r => r.Target_Production !== undefined);
+    .find(r =>
+      r.Target_Production !== undefined &&
+      r.Target_Production !== null &&
+      r.Target_Production !== ""
+    );
 
-  const targetProduction =
-    targetRow ? Number(targetRow.Target_Production) : 0;
+  let targetProduction = 0;
 
-  // 🔹 Projected Production (reuse your function)
+  if (targetRow) {
+    // Ensure numeric value (handles "100000", "100,000", "100000 mtr")
+    targetProduction = parseFloat(
+      String(targetRow.Target_Production).replace(/[^0-9.]/g, "")
+    );
+  }
+
+  if (isNaN(targetProduction)) {
+    targetProduction = 0;
+  }
+
+  // 2️⃣ Get projected production
   const proj = calculateProjectedProduction(rows);
-  const projectedProduction = proj.projected;
+  const projectedProduction = Number(proj.projected) || 0;
 
+  // 3️⃣ Calculate difference correctly
   const diff = projectedProduction - targetProduction;
 
   return {
@@ -1286,13 +1301,18 @@ function renderProjectedProduction(rows) {
     status: diff >= 0 ? "exceed" : "shortfall"
   };
 }
+
+
 function renderProjectedShortfall(rows) {
 
   const data = calculateProjectedShortfall(rows);
 
-  const box = document.getElementById("eodShortfallBox");
+  const box   = document.getElementById("eodShortfallBox");
   const label = document.getElementById("eodShortfallLabel");
   const value = document.getElementById("eodShortfallValue");
+
+  // Safety check
+  if (!box || !label || !value) return;
 
   if (data.status === "shortfall") {
     label.textContent = "Projected Shortfall";
