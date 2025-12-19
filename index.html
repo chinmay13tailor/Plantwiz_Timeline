@@ -1160,6 +1160,70 @@ function renderProjectedDowntime(rows, blocks) {
 
 }
 
+  function calculateProjectedProduction(rows) {
+
+  const now = new Date();
+
+  // ⏱ Elapsed time in minutes
+  const elapsedMinutes =
+    now.getHours() * 60 + now.getMinutes();
+
+  const totalDayMinutes = 24 * 60;
+  const remainingMinutes =
+    Math.max(totalDayMinutes - elapsedMinutes, 0);
+
+  // 📦 Production till now
+  const productionTillNow = rows.reduce(
+    (sum, r) => sum + (r.Meter_Run_Per_Min || 0),
+    0
+  );
+
+  // ⏳ Runtime till now
+  const runtimeTillNow = rows.reduce(
+    (sum, r) => sum + (r.Runtime || 0),
+    0
+  );
+
+  // 📈 Avg production rate (runtime based)
+  const avgProductionRate =
+    runtimeTillNow > 0
+      ? productionTillNow / runtimeTillNow
+      : 0;
+
+  // 🔮 Projected production
+  const projectedProduction =
+    productionTillNow + avgProductionRate * remainingMinutes;
+
+  // 📊 Expected performance
+  const expectedPerformance =
+    projectedProduction > 0
+      ? (productionTillNow / projectedProduction) * 100
+      : 0;
+
+  return {
+    projected: Math.round(projectedProduction),
+    avgRate: avgProductionRate.toFixed(2),
+    remainingMinutes,
+    expectedPerformance: expectedPerformance.toFixed(1)
+  };
+}
+function renderProjectedProduction(rows) {
+
+  const data = calculateProjectedProduction(rows);
+
+  document.getElementById("eodProjectedProd").textContent =
+    data.projected;
+
+  document.getElementById("eodProdRate").textContent =
+    `${data.avgRate} mtr/min`;
+
+  document.getElementById("eodRemainingTime").textContent =
+    `${data.remainingMinutes} min`;
+
+  document.getElementById("eodExpectedPerf").textContent =
+    `${data.expectedPerformance} %`;
+}
+
   
 /* ================= AGGREGATE ================= */
 function aggregate(rows){
@@ -1326,6 +1390,8 @@ async function loadTimeline(date){
     renderSummary(blocks);
     updateTime(blocks);
     renderProjectedDowntime(rows, blocks);
+    renderProjectedProduction(rows);
+
   } finally {
     hideLoading();                  // 🔑 ADD
   }
