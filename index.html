@@ -749,6 +749,21 @@ body{
 .down-theme .proj-divider{
   border-color:#fecaca;
 }
+  .shortfall-left{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.shortfall-title{
+  font-weight:700;
+}
+
+.shortfall-sub{
+  font-size:12px;
+  opacity:0.8;
+}
+
 </style>
 </head>
 <body>
@@ -888,10 +903,20 @@ body{
 
   </div> <!-- END eod-body -->
 
-  <!-- SHORTFALL (FULL WIDTH) -->
 <div class="eod-shortfall" id="eodShortfallBox">
-  <span id="eodShortfallLabel">Projected Shortfall</span>
+
+  <div class="shortfall-left">
+    <div id="eodShortfallLabel" class="shortfall-title">
+      Projection Exceeded
+    </div>
+    <div class="shortfall-sub">
+      Target Production:
+      <span id="eodTargetProduction">-- mtr</span>
+    </div>
+  </div>
+
   <strong id="eodShortfallValue">--</strong>
+
 </div>
 
 
@@ -1307,9 +1332,16 @@ function renderProjectedShortfall(rows) {
 
   const data = calculateProjectedShortfall(rows);
 
-  const box   = document.getElementById("eodShortfallBox");
-  const label = document.getElementById("eodShortfallLabel");
-  const value = document.getElementById("eodShortfallValue");
+const box = document.getElementById("eodShortfallBox");
+const label = document.getElementById("eodShortfallLabel");
+const value = document.getElementById("eodShortfallValue");
+const targetEl = document.getElementById("eodTargetProduction");
+
+// show target production
+if (targetEl) {
+  targetEl.textContent = `${data.target} mtr`;
+}
+
 
   // Safety check
   if (!box || !label || !value) return;
