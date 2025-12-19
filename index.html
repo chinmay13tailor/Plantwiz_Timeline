@@ -1083,7 +1083,7 @@ async function fetchData(date){
   const d=new Date(date);
   const start=new Date(d.toDateString()).getTime();
   const end=start+86400000-1;
-  const url=`${API}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${start}&endTs=${end}&agg=NONE&limit=5000`;
+  const url=`${API}/plugins/telemetry/DEVICE/${DEVICE_ID}/values/timeseries?keys=${KEYS.join(",")}&startTs=${start}&endTs=${end}&agg=NONE&limit=10000`;
   const r=await fetch(url,{headers:{ "X-Authorization":`Bearer ${JWT}` }});
   return r.json();
 }
