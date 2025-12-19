@@ -642,54 +642,80 @@ body{
   font-size:13px;
   color:#334155;
 }
-/* ===== EOD TARGET SUMMARY ===== */
+  /* ===== Projected Downtime – New UI ===== */
 
-.eod-target-row{
+.downtime-ui{
+  background:#faf5ff;
+  border:1.5px solid #e9d5ff;
+  border-radius:14px;
+  padding:16px;
+}
+
+.eod-box-header{
+  margin-bottom:8px;
+}
+
+.eod-box-title-row{
   display:flex;
-  justify-content:center;
   align-items:center;
-  gap:24px;
-  padding:14px 20px;
-  background:#ffffff;
-  border-bottom:1px solid #e5e7eb;
+  gap:8px;
+  font-weight:600;
   font-size:14px;
 }
 
-
-.eod-target-item{
-  display:flex;
-  gap:6px;
-  align-items:center;
+.eod-icon{
+  font-size:16px;
 }
 
-.eod-target-label{
-  color:#64748b;
-  font-weight:600;
-}
-
-.eod-target-value{
+.eod-main-value.danger{
+  font-size:32px;
   font-weight:800;
+  color:#dc2626;
+  margin-top:6px;
+}
+
+.eod-sub-text{
+  font-size:13px;
+  color:#6b7280;
+  margin-bottom:14px;
+}
+
+.eod-meta-grid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:12px 16px;
+  margin-bottom:14px;
+}
+
+.meta-label{
+  font-size:12px;
+  color:#6b7280;
+}
+
+.meta-value{
+  font-size:14px;
+  font-weight:600;
   color:#1f2937;
 }
 
-.eod-target-value.highlight{
-  color:#2563eb;
+.eod-status-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding-top:10px;
+  border-top:1px solid #e9d5ff;
+  font-size:13px;
 }
 
-.eod-divider{
-  color:#cbd5e1;
+.status-text{
   font-weight:700;
+  color:#dc2626;
 }
-
 
 </style>
 </head>
-
 <body>
-
   <!-- ================= LOADING ================= -->
-
-
 <div class="container">
 <div id="loading" style="
   display:none;
@@ -765,28 +791,46 @@ body{
     </div>
 
     <!-- Projected Downtime -->
-<div class="eod-box critical" id="eodDownBox">
+<div class="eod-box downtime-ui" id="eodDownBox">
 
-  <div class="eod-box-title">Projected Downtime</div>
-
-  <div class="eod-main-value" id="eodProjectedDown">-- min</div>
-  <div class="eod-sub-text">minutes total by EOD</div>
-
-  <div class="eod-meta">
-    <div>Avg Minor Downtime Rate / Block
-      <span id="eodDownRate">-- min</span>
-    </div>
-
-    <div>Blocks Analysed
-      <span id="eodDownBlocks">-- / 6</span>
-    </div>
-
-    <div>Status
-      <span class="status-text" id="eodDownStatus">--</span>
+  <!-- Header -->
+  <div class="eod-box-header">
+    <div class="eod-box-title-row">
+      <span class="eod-icon">⚠️</span>
+      <span class="eod-box-title">Projected Downtime</span>
     </div>
   </div>
 
+  <!-- Main value -->
+  <div class="eod-main-value danger" id="eodProjectedDown">--</div>
+  <div class="eod-sub-text">minutes total by EOD</div>
+
+  <!-- Meta info -->
+  <div class="eod-meta-grid">
+    <div>
+      <div class="meta-label">Avg. Downtime / Block</div>
+      <div class="meta-value" id="eodDownRate">-- min</div>
+    </div>
+
+    <div>
+      <div class="meta-label">Downtime So Far</div>
+      <div class="meta-value" id="eodDownSoFar">-- min</div>
+    </div>
+
+    <div>
+      <div class="meta-label">Blocks Analyzed</div>
+      <div class="meta-value" id="eodDownBlocks">--</div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="eod-status-row">
+    <span>Status</span>
+    <span class="status-text" id="eodDownStatus">--</span>
+  </div>
+
 </div>
+
 
 
   </div> <!-- END eod-body -->
