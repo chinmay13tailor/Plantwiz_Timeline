@@ -791,30 +791,41 @@ body{
   <div class="eod-body">
 
     <!-- Projected Production -->
-<div class="eod-box warning" id="eodProdBox">
+<div class="eod-box prod-ui" id="eodProdBox">
 
-  <div class="eod-box-title">Projected Production</div>
-
-  <div class="eod-main-line">
-    <span class="eod-main-value" id="eodProjectedProd">--</span>
-    <span class="eod-main-unit">mtr by EOD</span>
+  <!-- Header -->
+  <div class="prod-header">
+    <span class="prod-icon">⚠️</span>
+    <span class="prod-title">Projected Production</span>
   </div>
 
-  <div class="eod-meta">
-    <div>Avg Production Rate
-      <span id="eodProdRate">-- mtr/min</span>
+  <!-- Main Value -->
+  <div class="prod-main-value" id="eodProjectedProd">--</div>
+
+  <!-- Inner Meta Panel -->
+  <div class="prod-meta-panel">
+    <div class="prod-row">
+      <span>Avg. Production Rate</span>
+      <span class="prod-highlight" id="eodProdRate">-- mtr/min</span>
     </div>
 
-    <div>Remaining Time
-      <span id="eodRemainingTime">-- min</span>
+    <div class="prod-row">
+      <span>Remaining Time</span>
+      <span class="prod-highlight" id="eodRemainingTime">-- min</span>
     </div>
+  </div>
 
-    <div>Expected Performance
-      <span id="eodExpectedPerf">-- %</span>
-    </div>
+  <!-- Divider -->
+  <div class="prod-divider"></div>
+
+  <!-- Footer -->
+  <div class="prod-footer">
+    <span>Expected Performance</span>
+    <span class="prod-perf" id="eodExpectedPerf">--%</span>
   </div>
 
 </div>
+
 
 
     <!-- Projected Downtime -->
