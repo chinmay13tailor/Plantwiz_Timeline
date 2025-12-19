@@ -1311,29 +1311,28 @@ function renderProjectedShortfall(rows) {
   }
 }
 
-  function calculateElapsedTimeIST(selectedDate) {
+function calculateElapsedTime(selectedDate) {
 
-  // Current time in UTC
-  const nowUTC = new Date();
+  const now = new Date(); // browser local time (IST)
 
-  // Convert to IST (UTC + 5:30)
-  const nowIST = new Date(nowUTC.getTime() + (5.5 * 60 * 60 * 1000));
+  const startOfDay = new Date(selectedDate);
+  startOfDay.setHours(0, 0, 0, 0);
 
-  // Start of selected day in IST
-  const startOfDayIST = new Date(selectedDate);
-  startOfDayIST.setHours(0, 0, 0, 0);
-
-  // End of selected day in IST
-  const endOfDayIST = new Date(selectedDate);
-  endOfDayIST.setHours(23, 59, 59, 999);
+  const endOfDay = new Date(selectedDate);
+  endOfDay.setHours(23, 59, 59, 999);
 
   let elapsedMs;
 
-  if (nowIST >= startOfDayIST && nowIST <= endOfDayIST) {
-    elapsedMs = nowIST - startOfDayIST;
-  } else if (nowIST > endOfDayIST) {
+  // Today
+  if (now >= startOfDay && now <= endOfDay) {
+    elapsedMs = now - startOfDay;
+  }
+  // Past date
+  else if (now > endOfDay) {
     elapsedMs = 24 * 60 * 60 * 1000;
-  } else {
+  }
+  // Future date
+  else {
     elapsedMs = 0;
   }
 
@@ -1345,13 +1344,11 @@ function renderProjectedShortfall(rows) {
     hours: elapsedHours
   };
 }
+
 function renderTimeElapsed(selectedDate) {
-
-  const t = calculateElapsedTimeIST(selectedDate);
-
+  const t = calculateElapsedTime(selectedDate);
   const el = document.querySelector(".eod-time-value");
   if (!el) return;
-
   el.textContent = `${t.hours}h / 24h`;
 }
 
