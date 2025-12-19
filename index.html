@@ -765,17 +765,29 @@ body{
     </div>
 
     <!-- Projected Downtime -->
-    <div class="eod-box critical">
-      <div class="eod-box-title">Projected Downtime</div>
-      <div class="eod-main-value">--</div>
-      <div class="eod-sub-text">minutes total by EOD</div>
+<div class="eod-box critical" id="eodDownBox">
 
-      <div class="eod-meta">
-        <div>Avg Downtime Rate <span>--</span></div>
-        <div>Blocks Analyzed <span>--</span></div>
-        <div>Status <span class="status-text">--</span></div>
-      </div>
+  <div class="eod-box-title">Projected Downtime</div>
+
+  <div class="eod-main-value" id="eodProjectedDown">-- min</div>
+  <div class="eod-sub-text">minutes total by EOD</div>
+
+  <div class="eod-meta">
+    <div>Avg Minor Downtime Rate / Block
+      <span id="eodDownRate">-- min</span>
     </div>
+
+    <div>Blocks Analysed
+      <span id="eodDownBlocks">-- / 6</span>
+    </div>
+
+    <div>Status
+      <span class="status-text" id="eodDownStatus">--</span>
+    </div>
+  </div>
+
+</div>
+
 
   </div> <!-- END eod-body -->
 
@@ -989,7 +1001,103 @@ function mergeTelemetry(raw){
   });
   return Object.values(map);
 }
+function calculateMinorDowntimeByBlock(rows) {
 
+  const minorByBlock = Array(6).fill(0);
+
+  let streak = 0;
+  let streakBlock = null;
+
+  for (let i = 0; i < rows.length; i++) {
+
+    const r = rows[i];
+    const isDown = (r.Downtime || 0) > 0;
+    const blockIndex = Math.floor(new Date(r.ts).getHours() / 4);
+
+    if (isDown) {
+      if (streak === 0) streakBlock = blockIndex;
+      streak++;
+    }
+
+    // streak ends OR last row
+    if (!isDown || i === rows.length - 1) {
+
+      // Minor downtime = continuous ≤ 10 minutes
+      if (streak > 0 && streak <= 10 && streakBlock !== null) {
+        minorByBlock[streakBlock] += streak;
+      }
+
+      streak = 0;
+      streakBlock = null;
+    }
+  }
+
+  return minorByBlock; // minutes per block
+}
+function calculateProjectedDowntime(rows, blocks) {
+
+  const now = new Date();
+  const currentBlock = Math.floor(now.getHours() / 4);
+  const analysedBlocks = Math.min(currentBlock + 1, 6);
+
+  // 1️⃣ Total downtime till now (all downtime)
+  const totalDowntimeTillNow = blocks
+    .slice(0, analysedBlocks)
+    .reduce((s, b) => s + b.downtime, 0);
+
+  // 2️⃣ Minor downtime only
+  const minorByBlock = calculateMinorDowntimeByBlock(rows);
+  const minorTillNow = minorByBlock
+    .slice(0, analysedBlocks)
+    .reduce((s, v) => s + v, 0);
+
+  // 3️⃣ Avg minor downtime rate per block
+  const avgMinorRate =
+    analysedBlocks > 0 ? minorTillNow / analysedBlocks : 0;
+
+  // 4️⃣ Projected downtime
+  const remainingBlocks = 6 - analysedBlocks;
+
+  const projectedDowntime =
+    totalDowntimeTillNow + avgMinorRate * remainingBlocks;
+
+  return {
+    projected: Math.round(projectedDowntime),
+    avgMinorRate: avgMinorRate.toFixed(1),
+    analysedBlocks
+  };
+}
+function getProjectedDowntimeStatus(projected) {
+
+  if (projected > 120) {
+    return { label: "Above Threshold", cls: "critical" };
+  }
+
+  return { label: "Below Threshold", cls: "good" };
+}
+function renderProjectedDowntime(rows, blocks) {
+
+  const data = calculateProjectedDowntime(rows, blocks);
+  const status = getProjectedDowntimeStatus(data.projected);
+
+  document.getElementById("eodProjectedDown").textContent =
+    `${data.projected} min`;
+
+  document.getElementById("eodDownRate").textContent =
+    `${data.avgMinorRate} min/block`;
+
+  document.getElementById("eodDownBlocks").textContent =
+    `${data.analysedBlocks} / 6`;
+
+  document.getElementById("eodDownStatus").textContent =
+    status.label;
+
+  const box = document.getElementById("eodDownBox");
+  box.classList.remove("good", "warning", "critical");
+  box.classList.add(status.cls);
+}
+
+  
 /* ================= AGGREGATE ================= */
 function aggregate(rows){
   const blocks=[...Array(6)].map(()=>({actual:0,expected:0,downtime:0,runtime:0,p:[],o:[]}));
@@ -1154,6 +1262,7 @@ async function loadTimeline(date){
     render(blocks);
     renderSummary(blocks);
     updateTime(blocks);
+    renderProjectedDowntime(rows, blocks);
   } finally {
     hideLoading();                  // 🔑 ADD
   }
