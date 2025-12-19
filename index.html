@@ -812,6 +812,7 @@ body{
 <div id="details" class="details"></div>
 <div id="summary" class="summary"></div>
 <!-- ================= END OF DAY PROJECTION ================= -->
+  <div class="eod-card" id="eodProjectionBlock">
 <div class="eod-card">
 
   <!-- HEADER -->
@@ -931,6 +932,7 @@ body{
   </div>
 
 </div>
+  </div>
 
 
   
@@ -1398,6 +1400,21 @@ function renderTimeElapsed(selectedDate) {
   el.textContent = `${t.hours}h / 24h`;
 }
 
+function toggleEODVisibility(selectedDate) {
+
+  const eod = document.getElementById("eodProjectionBlock");
+  if (!eod) return;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const sel = new Date(selectedDate);
+  sel.setHours(0, 0, 0, 0);
+
+  // Show only if TODAY
+  eod.style.display =
+    sel.getTime() === today.getTime() ? "block" : "none";
+}
 
 
   
@@ -1569,6 +1586,8 @@ async function loadTimeline(date){
     renderProjectedProduction(rows);
     renderProjectedShortfall(rows);
     renderTimeElapsed(selectedDate);
+    toggleEODVisibility(selectedDate);
+
 
 
 
