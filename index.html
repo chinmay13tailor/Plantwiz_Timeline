@@ -1290,33 +1290,26 @@ function renderProjectedProduction(rows) {
 
 function calculateProjectedShortfall(rows) {
 
-  // 1️⃣ Get latest valid Target Production value
-  const targetRow = [...rows]
-    .reverse()
-    .find(r =>
-      r.Target_Production !== undefined &&
-      r.Target_Production !== null &&
-      r.Target_Production !== ""
-    );
-
   let targetProduction = 0;
+  let latestTs = -1;
 
-  if (targetRow) {
-    // Ensure numeric value (handles "100000", "100,000", "100000 mtr")
-    targetProduction = parseFloat(
-      String(targetRow.Target_Production).replace(/[^0-9.]/g, "")
-    );
-  }
+  rows.forEach(r => {
+    if (r.Target_Production !== undefined && r.ts) {
 
-  if (isNaN(targetProduction)) {
-    targetProduction = 0;
-  }
+      const val = parseFloat(
+        String(r.Target_Production).replace(/[^0-9.]/g, "")
+      );
 
-  // 2️⃣ Get projected production
+      if (!isNaN(val) && r.ts > latestTs) {
+        latestTs = r.ts;
+        targetProduction = val;
+      }
+    }
+  });
+
   const proj = calculateProjectedProduction(rows);
   const projectedProduction = Number(proj.projected) || 0;
 
-  // 3️⃣ Calculate difference correctly
   const diff = projectedProduction - targetProduction;
 
   return {
@@ -1326,6 +1319,7 @@ function calculateProjectedShortfall(rows) {
     status: diff >= 0 ? "exceed" : "shortfall"
   };
 }
+
 
 
 function renderProjectedShortfall(rows) {
