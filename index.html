@@ -4,9 +4,7 @@
 <meta charset="UTF-8" />
 <title>Plantwiz | Production Timeline</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
 <style>
-
   .spinner{
   width:28px;
   height:28px;
@@ -642,159 +640,115 @@ body{
   font-size:13px;
   color:#334155;
 }
-  /* ===== Projected Downtime – New UI ===== */
 
-.downtime-ui{
-  background:#faf5ff;
-  border:1.5px solid #e9d5ff;
-  border-radius:14px;
-  padding:16px;
+  /* ===== Projected Production – UI ===== */
+/* ===== Unified Projection Card ===== */
+
+.eod-projection-card{
+  border-radius:16px;
+  padding:16px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
-.eod-box-header{
-  margin-bottom:8px;
-}
-
-.eod-box-title-row{
+.proj-header{
   display:flex;
   align-items:center;
   gap:8px;
-  font-weight:600;
   font-size:14px;
+  font-weight:600;
 }
 
-.eod-icon{
+.proj-icon{
   font-size:16px;
 }
 
-.eod-main-value.danger{
-  font-size:32px;
-  font-weight:800;
-  color:#dc2626;
-  margin-top:6px;
-}
-
-.eod-sub-text{
-  font-size:13px;
-  color:#6b7280;
-  margin-bottom:14px;
-}
-
-.eod-meta-grid{
-  display:grid;
-  grid-template-columns:repeat(2, 1fr);
-  gap:12px 16px;
-  margin-bottom:14px;
-}
-
-.meta-label{
-  font-size:12px;
-  color:#6b7280;
-}
-
-.meta-value{
-  font-size:14px;
-  font-weight:600;
-  color:#1f2937;
-}
-
-.eod-status-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding-top:10px;
-  border-top:1px solid #e9d5ff;
-  font-size:13px;
-}
-
-.status-text{
-  font-weight:700;
-  color:#dc2626;
-}
-  .eod-main-line{
+.proj-main-line{
   display:flex;
   align-items:baseline;
   gap:8px;
-  margin:6px 0 14px;
 }
 
-.eod-main-unit{
-  font-size:13px;
-  color:#6b7280;
-  font-weight:500;
-}
-  /* ===== Projected Production – UI ===== */
-
-.prod-ui{
-  background:#fffbeb;
-  border:2px solid #f59e0b;
-  border-radius:16px;
-  padding:16px 18px;
-}
-
-.prod-header{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size:14px;
-  font-weight:600;
-  color:#92400e;
-  margin-bottom:8px;
-}
-
-.prod-icon{
-  font-size:16px;
-}
-
-.prod-main-value{
+.proj-main-value{
   font-size:34px;
   font-weight:800;
-  color:#d97706;
-  margin-bottom:12px;
 }
 
-.prod-meta-panel{
-  background:#fff7ed;
+.proj-main-unit{
+  font-size:13px;
+  opacity:0.75;
+}
+
+.proj-meta-panel{
   border-radius:10px;
   padding:10px 12px;
   font-size:13px;
 }
 
-.prod-row{
+.proj-row{
   display:flex;
   justify-content:space-between;
   margin-bottom:6px;
-  color:#7c2d12;
 }
 
-.prod-row:last-child{
+.proj-row:last-child{
   margin-bottom:0;
 }
 
-.prod-highlight{
-  font-weight:700;
-  color:#7c2d12;
+.proj-divider{
+  border-top:1px solid;
+  opacity:0.4;
 }
 
-.prod-divider{
-  margin:12px 0;
-  border-top:1px solid #fed7aa;
-}
-
-.prod-footer{
+.proj-footer{
   display:flex;
   justify-content:space-between;
   font-size:13px;
   font-weight:600;
+}
+.prod-theme{
+  background:#fffbeb;
+  border:2px solid #f59e0b;
+}
+
+.prod-theme .proj-header,
+.prod-theme .proj-footer{
   color:#92400e;
 }
 
-.prod-perf{
+.prod-theme .proj-main-value{
   color:#d97706;
 }
 
+.prod-theme .proj-meta-panel{
+  background:#fff7ed;
+}
 
+.prod-theme .proj-divider{
+  border-color:#fed7aa;
+}
+.down-theme{
+  background:#fef2f2;
+  border:2px solid #ef4444;
+}
 
+.down-theme .proj-header,
+.down-theme .proj-footer{
+  color:#991b1b;
+}
+
+.down-theme .proj-main-value{
+  color:#dc2626;
+}
+
+.down-theme .proj-meta-panel{
+  background:#fff1f2;
+}
+
+.down-theme .proj-divider{
+  border-color:#fecaca;
+}
 </style>
 </head>
 <body>
@@ -861,86 +815,70 @@ body{
   <div class="eod-body">
 
     <!-- Projected Production -->
-<div class="eod-box prod-ui" id="eodProdBox">
-
-  <!-- Header -->
-  <div class="prod-header">
-    <span class="prod-icon">⚠️</span>
-    <span class="prod-title">Projected Production</span>
+<div class="eod-projection-card prod-theme" id="eodProdBox">
+  <div class="proj-header">
+    <span class="proj-icon">⚠️</span>
+    <span class="proj-title">Projected Production</span>
   </div>
 
-  <!-- Main Value -->
-  <div class="prod-main-value" id="eodProjectedProd">--</div>
+  <div class="proj-main-line">
+    <span class="proj-main-value" id="eodProjectedProd">--</span>
+    <span class="proj-main-unit">mtr by EOD</span>
+  </div>
 
-  <!-- Inner Meta Panel -->
-  <div class="prod-meta-panel">
-    <div class="prod-row">
+  <div class="proj-meta-panel">
+    <div class="proj-row">
       <span>Avg. Production Rate</span>
-      <span class="prod-highlight" id="eodProdRate">-- mtr/min</span>
+      <span id="eodProdRate">--</span>
     </div>
-
-    <div class="prod-row">
+    <div class="proj-row">
       <span>Remaining Time</span>
-      <span class="prod-highlight" id="eodRemainingTime">-- min</span>
+      <span id="eodRemainingTime">--</span>
     </div>
   </div>
 
-  <!-- Divider -->
-  <div class="prod-divider"></div>
+  <div class="proj-divider"></div>
 
-  <!-- Footer -->
-  <div class="prod-footer">
+  <div class="proj-footer">
     <span>Expected Performance</span>
-    <span class="prod-perf" id="eodExpectedPerf">--%</span>
+    <span id="eodExpectedPerf">--%</span>
   </div>
-
 </div>
 
+<div class="eod-projection-card down-theme" id="eodDownBox">
+  <div class="proj-header">
+    <span class="proj-icon">⚠️</span>
+    <span class="proj-title">Projected Downtime</span>
+  </div>
 
+  <div class="proj-main-line">
+    <span class="proj-main-value" id="eodProjectedDown">--</span>
+    <span class="proj-main-unit">min by EOD</span>
+  </div>
 
-    <!-- Projected Downtime -->
-<div class="eod-box downtime-ui" id="eodDownBox">
-
-  <!-- Header -->
-  <div class="eod-box-header">
-    <div class="eod-box-title-row">
-      <span class="eod-icon">⚠️</span>
-      <span class="eod-box-title">Projected Downtime</span>
+  <div class="proj-meta-panel">
+    <div class="proj-row">
+      <span>Avg. Downtime / Block</span>
+      <span id="eodDownRate">--</span>
+    </div>
+    <div class="proj-row">
+      <span>Downtime So Far</span>
+      <span id="eodDownSoFar">--</span>
+    </div>
+    <div class="proj-row">
+      <span>Blocks Analyzed</span>
+      <span id="eodDownBlocks">--</span>
     </div>
   </div>
 
-  <!-- Main value -->
-<div class="eod-main-line">
-  <span class="eod-main-value danger" id="eodProjectedDown">--</span>
-  <span class="eod-main-unit">minutes total by EOD</span>
-</div>
+  <div class="proj-divider"></div>
 
-
-  <!-- Meta info -->
-  <div class="eod-meta-grid">
-    <div>
-      <div class="meta-label">Avg. Downtime / Block</div>
-      <div class="meta-value" id="eodDownRate">-- min</div>
-    </div>
-
-    <div>
-      <div class="meta-label">Downtime So Far</div>
-      <div class="meta-value" id="eodDownSoFar">-- min</div>
-    </div>
-
-    <div>
-      <div class="meta-label">Blocks Analyzed</div>
-      <div class="meta-value" id="eodDownBlocks">--</div>
-    </div>
-  </div>
-
-  <!-- Status -->
-  <div class="eod-status-row">
+  <div class="proj-footer">
     <span>Status</span>
-    <span class="status-text" id="eodDownStatus">--</span>
+    <span id="eodDownStatus">--</span>
   </div>
-
 </div>
+
 
 
 
