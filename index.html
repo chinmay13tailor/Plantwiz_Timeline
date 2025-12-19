@@ -889,10 +889,11 @@ body{
   </div> <!-- END eod-body -->
 
   <!-- SHORTFALL (FULL WIDTH) -->
-  <div class="eod-shortfall">
-    Projected Shortfall
-    <strong>--</strong>
-  </div>
+<div class="eod-shortfall" id="eodShortfallBox">
+  <span id="eodShortfallLabel">Projected Shortfall</span>
+  <strong id="eodShortfallValue">--</strong>
+</div>
+
 
   <!-- INSIGHTS (FULL WIDTH) -->
   <div class="eod-insights">
@@ -1066,7 +1067,7 @@ const DEVICE_ID="81261350-b886-11f0-87ea-b9809c1a7a9e";
 const KEYS=[
   "Meter_Run_Per_Min","Consumption_Per_Min","deltaexpectedproduction",
   "Runtime","Downtime","Idletime",
-  "deltaperformance","deltaavailability","deltaquality","deltaoee"
+  "deltaperformance","deltaavailability","deltaquality","deltaoee",""Target_Production""
 ];
 const BLOCKS=["00–04","04–08","08–12","12–16","16–20","20–24"];
 const JWT=new URLSearchParams(location.search).get("token");
@@ -1428,6 +1429,8 @@ async function loadTimeline(date){
     updateTime(blocks);
     renderProjectedDowntime(rows, blocks);
     renderProjectedProduction(rows);
+    renderProjectedShortfall(rows);
+
 
   } finally {
     hideLoading();                  // 🔑 ADD
@@ -1510,6 +1513,58 @@ function openAnalysis(block){
     zoneReasonDown.textContent =
       `⛔ Downtime ${block.downtime} minutes exceeds limit`;
   }
+
+  /*========Projected shortfall or exceed============*/
+
+  function calculateProjectedShortfall(rows) {
+
+  // 🔹 Target Production (latest value)
+  const targetRow = [...rows]
+    .reverse()
+    .find(r => r.Target_Production !== undefined);
+
+  const targetProduction =
+    targetRow ? Number(targetRow.Target_Production) : 0;
+
+  // 🔹 Projected Production (reuse your function)
+  const proj = calculateProjectedProduction(rows);
+  const projectedProduction = proj.projected;
+
+  const diff = projectedProduction - targetProduction;
+
+  return {
+    target: targetProduction,
+    projected: projectedProduction,
+    difference: Math.abs(diff),
+    status: diff >= 0 ? "exceed" : "shortfall"
+  };
+}
+function renderProjectedShortfall(rows) {
+
+  const data = calculateProjectedShortfall(rows);
+
+  const box = document.getElementById("eodShortfallBox");
+  const label = document.getElementById("eodShortfallLabel");
+  const value = document.getElementById("eodShortfallValue");
+
+  if (data.status === "shortfall") {
+    label.textContent = "Projected Shortfall";
+    value.textContent = `${data.difference} mtr`;
+
+    box.style.background = "#fff7ed";
+    box.style.border = "1px solid #fed7aa";
+    box.style.color = "#9a3412";
+  } else {
+    label.textContent = "Projection Exceeded";
+    value.textContent = `+${data.difference} mtr`;
+
+    box.style.background = "#ecfdf5";
+    box.style.border = "1px solid #a7f3d0";
+    box.style.color = "#065f46";
+  }
+}
+
+  
   /* ===== DETAILED FINDINGS CALCULATIONS ===== */
 
 // Production Analysis
