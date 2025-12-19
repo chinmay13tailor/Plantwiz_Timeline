@@ -10,7 +10,7 @@
   height:28px;
   border:3px solid #c7d2fe;
   border-top:3px solid #2563eb;
-  border-radius:50%;
+  border-radius:50%;renderProjectedShortfall
   animation:spin .9s linear infinite;
 }
 @keyframes spin{
@@ -1261,6 +1261,101 @@ function renderProjectedProduction(rows) {
   document.getElementById("eodExpectedPerf").textContent =
     `${data.expectedPerformance} %`;
 }
+    /*========Projected shortfall or exceed============*/
+
+  function calculateProjectedShortfall(rows) {
+
+  // 🔹 Target Production (latest value)
+  const targetRow = [...rows]
+    .reverse()
+    .find(r => r.Target_Production !== undefined);
+
+  const targetProduction =
+    targetRow ? Number(targetRow.Target_Production) : 0;
+
+  // 🔹 Projected Production (reuse your function)
+  const proj = calculateProjectedProduction(rows);
+  const projectedProduction = proj.projected;
+
+  const diff = projectedProduction - targetProduction;
+
+  return {
+    target: targetProduction,
+    projected: projectedProduction,
+    difference: Math.abs(diff),
+    status: diff >= 0 ? "exceed" : "shortfall"
+  };
+}
+function renderProjectedShortfall(rows) {
+
+  const data = calculateProjectedShortfall(rows);
+
+  const box = document.getElementById("eodShortfallBox");
+  const label = document.getElementById("eodShortfallLabel");
+  const value = document.getElementById("eodShortfallValue");
+
+  if (data.status === "shortfall") {
+    label.textContent = "Projected Shortfall";
+    value.textContent = `${data.difference} mtr`;
+
+    box.style.background = "#fff7ed";
+    box.style.border = "1px solid #fed7aa";
+    box.style.color = "#9a3412";
+  } else {
+    label.textContent = "Projection Exceeded";
+    value.textContent = `+${data.difference} mtr`;
+
+    box.style.background = "#ecfdf5";
+    box.style.border = "1px solid #a7f3d0";
+    box.style.color = "#065f46";
+  }
+}
+
+  function calculateElapsedTimeIST(selectedDate) {
+
+  // Current time in UTC
+  const nowUTC = new Date();
+
+  // Convert to IST (UTC + 5:30)
+  const nowIST = new Date(nowUTC.getTime() + (5.5 * 60 * 60 * 1000));
+
+  // Start of selected day in IST
+  const startOfDayIST = new Date(selectedDate);
+  startOfDayIST.setHours(0, 0, 0, 0);
+
+  // End of selected day in IST
+  const endOfDayIST = new Date(selectedDate);
+  endOfDayIST.setHours(23, 59, 59, 999);
+
+  let elapsedMs;
+
+  if (nowIST >= startOfDayIST && nowIST <= endOfDayIST) {
+    elapsedMs = nowIST - startOfDayIST;
+  } else if (nowIST > endOfDayIST) {
+    elapsedMs = 24 * 60 * 60 * 1000;
+  } else {
+    elapsedMs = 0;
+  }
+
+  const elapsedMinutes = Math.floor(elapsedMs / 60000);
+  const elapsedHours = (elapsedMinutes / 60).toFixed(1);
+
+  return {
+    minutes: elapsedMinutes,
+    hours: elapsedHours
+  };
+}
+function renderTimeElapsed(selectedDate) {
+
+  const t = calculateElapsedTimeIST(selectedDate);
+
+  const el = document.querySelector(".eod-time-value");
+  if (!el) return;
+
+  el.textContent = `${t.hours}h / 24h`;
+}
+
+
 
   
 /* ================= AGGREGATE ================= */
@@ -1430,6 +1525,8 @@ async function loadTimeline(date){
     renderProjectedDowntime(rows, blocks);
     renderProjectedProduction(rows);
     renderProjectedShortfall(rows);
+    renderTimeElapsed(selectedDate);
+
 
 
   } finally {
@@ -1514,55 +1611,6 @@ function openAnalysis(block){
       `⛔ Downtime ${block.downtime} minutes exceeds limit`;
   }
 
-  /*========Projected shortfall or exceed============*/
-
-  function calculateProjectedShortfall(rows) {
-
-  // 🔹 Target Production (latest value)
-  const targetRow = [...rows]
-    .reverse()
-    .find(r => r.Target_Production !== undefined);
-
-  const targetProduction =
-    targetRow ? Number(targetRow.Target_Production) : 0;
-
-  // 🔹 Projected Production (reuse your function)
-  const proj = calculateProjectedProduction(rows);
-  const projectedProduction = proj.projected;
-
-  const diff = projectedProduction - targetProduction;
-
-  return {
-    target: targetProduction,
-    projected: projectedProduction,
-    difference: Math.abs(diff),
-    status: diff >= 0 ? "exceed" : "shortfall"
-  };
-}
-function renderProjectedShortfall(rows) {
-
-  const data = calculateProjectedShortfall(rows);
-
-  const box = document.getElementById("eodShortfallBox");
-  const label = document.getElementById("eodShortfallLabel");
-  const value = document.getElementById("eodShortfallValue");
-
-  if (data.status === "shortfall") {
-    label.textContent = "Projected Shortfall";
-    value.textContent = `${data.difference} mtr`;
-
-    box.style.background = "#fff7ed";
-    box.style.border = "1px solid #fed7aa";
-    box.style.color = "#9a3412";
-  } else {
-    label.textContent = "Projection Exceeded";
-    value.textContent = `+${data.difference} mtr`;
-
-    box.style.background = "#ecfdf5";
-    box.style.border = "1px solid #a7f3d0";
-    box.style.color = "#065f46";
-  }
-}
 
   
   /* ===== DETAILED FINDINGS CALCULATIONS ===== */
