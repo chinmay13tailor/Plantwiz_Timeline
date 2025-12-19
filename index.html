@@ -791,17 +791,31 @@ body{
   <div class="eod-body">
 
     <!-- Projected Production -->
-    <div class="eod-box warning">
-      <div class="eod-box-title">Projected Production</div>
-      <div class="eod-main-value">--</div>
-      <div class="eod-sub-text">out of -- target</div>
+<div class="eod-box warning" id="eodProdBox">
 
-      <div class="eod-meta">
-        <div>Avg Production Rate <span>--</span></div>
-        <div>Remaining Time <span>--</span></div>
-        <div>Expected Performance <span>--</span></div>
-      </div>
+  <div class="eod-box-title">Projected Production</div>
+
+  <div class="eod-main-line">
+    <span class="eod-main-value" id="eodProjectedProd">--</span>
+    <span class="eod-main-unit">mtr by EOD</span>
+  </div>
+
+  <div class="eod-meta">
+    <div>Avg Production Rate
+      <span id="eodProdRate">-- mtr/min</span>
     </div>
+
+    <div>Remaining Time
+      <span id="eodRemainingTime">-- min</span>
+    </div>
+
+    <div>Expected Performance
+      <span id="eodExpectedPerf">-- %</span>
+    </div>
+  </div>
+
+</div>
+
 
     <!-- Projected Downtime -->
 <div class="eod-box downtime-ui" id="eodDownBox">
