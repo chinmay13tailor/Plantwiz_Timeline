@@ -736,7 +736,7 @@ body{
 <!-- ================= END OF DAY PROJECTION ================= -->
 <div class="eod-card">
 
-  <!-- Header -->
+  <!-- HEADER -->
   <div class="eod-header">
     <div>
       <div class="eod-title">End of Day Projection</div>
@@ -749,22 +749,23 @@ body{
     </div>
   </div>
 
-  <!-- Content -->
+  <!-- TARGET SUMMARY (FULL WIDTH) -->
+  <div class="eod-target-row">
+    <div class="eod-target-item">
+      <span class="eod-target-label">Target Production</span>
+      <span class="eod-target-value" id="eodTarget">-- mtr</span>
+    </div>
+
+    <div class="eod-divider">|</div>
+
+    <div class="eod-target-item">
+      <span class="eod-target-label">Production Till Now</span>
+      <span class="eod-target-value highlight" id="eodActual">-- mtr</span>
+    </div>
+  </div>
+
+  <!-- TWO COLUMN GRID -->
   <div class="eod-body">
-<!-- EOD TARGET SUMMARY -->
-<div class="eod-target-row">
-  <div class="eod-target-item">
-    <span class="eod-target-label">Target Production</span>
-    <span class="eod-target-value" id="eodTarget">-- mtr</span>
-  </div>
-
-  <div class="eod-divider">|</div>
-
-  <div class="eod-target-item">
-    <span class="eod-target-label">Production Till Now</span>
-    <span class="eod-target-value highlight" id="eodActual">-- mtr</span>
-  </div>
-</div>
 
     <!-- Projected Production -->
     <div class="eod-box warning">
@@ -792,15 +793,15 @@ body{
       </div>
     </div>
 
-  </div>
+  </div> <!-- END eod-body -->
 
-  <!-- Shortfall -->
+  <!-- SHORTFALL (FULL WIDTH) -->
   <div class="eod-shortfall">
     Projected Shortfall
     <strong>--</strong>
   </div>
 
-  <!-- Insights -->
+  <!-- INSIGHTS (FULL WIDTH) -->
   <div class="eod-insights">
     <div class="eod-insights-title">Smart Insights</div>
     <ul>
@@ -811,6 +812,7 @@ body{
   </div>
 
 </div>
+
 
   
 </div>
